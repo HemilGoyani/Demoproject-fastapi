@@ -1,8 +1,12 @@
+from cgitb import text
+import enum
 from http.client import HTTPException
 from typing import Dict, List, Optional
 from pydantic import BaseModel, validator
 from fastapi import HTTPException, status
 import re
+
+from typer import Option
 
 
 
@@ -106,4 +110,10 @@ class Getproducts(BaseModel):
     class Config():
         orm_mode = True
 
+class Getmodule(BaseModel):
+    id: Optional[int]
+    name: Optional[str]
+  
+    class Config():
+        orm_mode = True
     

@@ -8,3 +8,4 @@ from typing import List
 router = APIRouter(tags=["permission"])
 
 get_db = db.get_db
+

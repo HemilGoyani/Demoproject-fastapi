@@ -29,3 +29,4 @@ async def update_user(id: int, data: schemas.Update_user, db: Session = Depends(
 @router.delete('/user/delete')
 async def remove(id: int, db: Session = Depends(get_db)):
     return admin.remove(id, db)
+

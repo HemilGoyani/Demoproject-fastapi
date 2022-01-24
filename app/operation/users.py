@@ -19,7 +19,7 @@ def hash_password(password):
     return (salt + pwdhash).decode('ascii')
 
 
-def create(user, db):
+def create(user,value, db):
     existuser = db.query(Usersignup).filter(
         Usersignup.email == user.email, Usersignup.password == user.password)
     getfirst = existuser.first()
@@ -41,14 +41,6 @@ def login(email, password, db):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="email and password not found")
     return user.__dict__
-
-
-def login2(user, db):
-    loginuser = db.query(Usersignup).filter(Usersignup.email ==
-                                            user.email, Usersignup.password == user.password).first()
-    if not loginuser:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="email and password not found")
-    return loginuser
 
 
 def forgotpass(id, email, db):
