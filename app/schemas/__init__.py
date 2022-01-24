@@ -21,6 +21,11 @@ def validate_emails(cls, email):
         return email
     return email
 
+def should_not_empty(cls, string):
+    return_str = string.strip()
+    if not return_str:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="empty name not accept")
+    return return_str
 
 class Reqsignup(BaseModel):
     name: str
@@ -72,7 +77,8 @@ class login(BaseModel):
 class Reubrands(BaseModel):
     name: str
     active: bool
-
+    _name = validator(
+        'name', allow_reuse=True)(should_not_empty)
     class Config():
         orm_mode = True
 
@@ -84,5 +90,20 @@ class Getbrands(BaseModel):
     class Config():
         orm_mode = True
 
+class Reuproducts(BaseModel):
+    name: str
+    active: bool
+    
+    class Config():
+        orm_mode = True
+
+class Getproducts(BaseModel):
+    id:Optional[int]
+    brand_id: Optional[int]
+    name: Optional[str]
+    active: Optional[bool]
+
+    class Config():
+        orm_mode = True
 
     

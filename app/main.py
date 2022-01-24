@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import signup, products_brands
+from app.routers import products, brands, admin, users
 
 app = FastAPI()
 
@@ -7,6 +7,9 @@ app = FastAPI()
 def root():
     return "Demo-Project"
 
+app.include_router(users.router)
+app.include_router(admin.router)
+app.include_router(brands.router)
+app.include_router(products.router)
 
-app.include_router(signup.router)
-app.include_router(products_brands.router)
+
