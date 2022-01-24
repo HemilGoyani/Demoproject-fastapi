@@ -1,0 +1,32 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres
+    command: ["postgres", "-c", "log_statement=all"]
+    restart: always
+    environment:
+      POSTGRES_DB: demoproject
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+
+  backend:
+    build: .
+    command: uvicorn app.main:app --reload --port 8000 --host 0.0.0.0
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - 8000:8000
+    links: 
+      - postgres 
+    depends_on:
+      - postgres
+      - redis 
+  redis:
+    image: redis:6-alpine
+
+volumes:
+  db-data:
