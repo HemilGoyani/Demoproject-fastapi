@@ -19,7 +19,7 @@ def hash_password(password):
     return (salt + pwdhash).decode('ascii')
 
 
-def create(user,value, db):
+def create(user, db):
     existuser = db.query(Usersignup).filter(
         Usersignup.email == user.email, Usersignup.password == user.password)
     getfirst = existuser.first()

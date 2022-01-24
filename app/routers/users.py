@@ -11,7 +11,7 @@ get_db = db.get_db
 
 @router.post('/user/registration', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
 async def create(user: schemas.Reqsignup, db: Session = Depends(get_db)):
-    return users.create(user, db)
+    return users.create(user,db)
 
 
 @router.post('/user/signin', response_model=schemas.Getsignup)

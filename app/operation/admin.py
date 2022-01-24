@@ -3,7 +3,7 @@ import hashlib
 from app.database import db
 from fastapi import HTTPException, status
 from typing import List
-from app.models import Usersignup
+from app.models import Role, Usersignup, UserRole
 import os
 get_db = db.get_db
 
@@ -52,5 +52,30 @@ def remove(id, db):
     db.commit()
     return {"detail": f"user id {id} is deleted"}
 
+
+def assign_role(user_id, role_name, db):
+    user = db.query(Usersignup).filter(Usersignup.id == user_id)
+    users = user.first()
+    if not users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"user {user_id} is not found")
+
+    
+    existrole = db.query(UserRole).filter(
+        UserRole.user_id == user_id, UserRole.role_name == role_name.title())
+    getfirst = existrole.first()
+
+    if not getfirst:
+        check_role = db.query(Role).filter(Role.name == role_name.title()).first()
+       
+        if check_role:
+            assign_role = UserRole(user_id = user_id, role_name= role_name.title())
+            db.add(assign_role)
+            db.commit()
+            return assign_role
+        else:
+             raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS, detail= f"role name {role_name} is not exist")
+    else:
+        raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS, detail= f"allready role {role_name} is assign to the {user_id} id")
+    
 
 

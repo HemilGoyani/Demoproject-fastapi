@@ -3,7 +3,6 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from app import schemas
 from sqlalchemy.orm.session import Session
 from typing import List
-from app.models import Usersignup
 from app.operation import admin
 
 router = APIRouter(tags=['Admin'])
@@ -20,6 +19,9 @@ async def getallusers(db: Session = Depends(get_db)):
 async def getuserbyid(id: int, db: Session = Depends(get_db)):
     return admin.getuserbyid(id, db)
 
+@router.post('/user/assign_role', response_model= schemas.Getuser_role)
+async def assign_role(user_id: int,role_name: str, db: Session = Depends(get_db)):
+    return admin.assign_role(user_id, role_name, db)
 
 @router.put('/user/update', response_model=schemas.Getsignup)
 async def update_user(id: int, data: schemas.Update_user, db: Session = Depends(get_db)):

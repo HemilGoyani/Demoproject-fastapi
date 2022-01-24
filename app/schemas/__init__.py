@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, validator
 from fastapi import HTTPException, status
 import re
+from pyrsistent import optional
 
 from typer import Option
 
@@ -117,3 +118,18 @@ class Getmodule(BaseModel):
     class Config():
         orm_mode = True
     
+class Getroles(BaseModel):
+    id: Optional[int]
+    name: Optional[str]
+    active: Optional[bool]
+    
+    class Config():
+        orm_mode = True
+
+class Getuser_role(BaseModel):
+    id:Optional[int]
+    user_id: Optional[int]
+    role_name: Optional[str]  
+
+    class Config():
+        orm_mode = True

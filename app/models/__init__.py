@@ -20,8 +20,7 @@ class Usersignup(Base):
     password = Column(String,index=True)
     
     user = relationship('UserRole', back_populates='user')
-    roles = relationship('Role', back_populates='user')
-    permissions = relationship('Permission',back_populates='user')
+   
 
 class Brand(Base):
     __tablename__ = 'brands'
@@ -47,11 +46,11 @@ class Role(Base):
     __tablename__ = "roles"
 
     id = Column(Integer, primary_key=True, index=True)
-    role = Column(String(100))
+    name = Column(String,unique=True, index=True)
     active = Column(Boolean, default=True)
     
     permissions = relationship('Permission', back_populates='roles')
-    user_role = relationship("UserRole", back_populates="role")
+    
     
 
 class UserRole(Base):
@@ -59,10 +58,10 @@ class UserRole(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
+    role_name = Column(String, index=True)
 
     user = relationship('Usersignup',back_populates='user')
-    role = relationship("Role", back_populates="user_role")
+    
    
 class Modules(Base):
     __tablename__ = "modules"
@@ -80,12 +79,10 @@ class Permission(Base):
     __tablename__ = "permissions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
     access_type = Column(Enum(AccessName))
     role_id = Column(Integer, ForeignKey(Role.id))
     module_id = Column(Integer, ForeignKey(Modules.id))
 
-    user = relationship('Usersignup', back_populates='permissions')
     roles = relationship("Role", back_populates='permissions')
     module = relationship("Modules", back_populates="permission")
     

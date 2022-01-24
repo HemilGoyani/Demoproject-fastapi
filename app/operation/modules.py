@@ -21,3 +21,10 @@ def create_module(module_name, db):
     else:
         raise HTTPException(
             status_code=status.HTTP_207_MULTI_STATUS, detail=f"allready module {module_name} is exist")
+
+def get_module(db):
+    exist_module = db.query(Modules).all()
+    if not exist_module:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"module not exist")
+    return exist_module
