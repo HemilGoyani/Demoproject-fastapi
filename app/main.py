@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import products, brands, admin, users
+from app.routers import products, brands, admin, users, permission
 
 app = FastAPI()
 
@@ -11,5 +11,5 @@ app.include_router(users.router)
 app.include_router(admin.router)
 app.include_router(brands.router)
 app.include_router(products.router)
-
+app.include_router(permission.router)
 
