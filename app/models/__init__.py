@@ -87,6 +87,7 @@ class Permission(Base):
     access_type = Column(Enum(AccessName))
     role_id = Column(Integer, ForeignKey(Role.id))
     module_id = Column(Integer, ForeignKey(Modules.id))
+   
 
     roles = relationship("Role", back_populates='permissions')
     module = relationship("Modules", back_populates="permission")

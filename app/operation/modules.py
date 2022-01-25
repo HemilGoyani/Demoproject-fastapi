@@ -1,8 +1,8 @@
 from ast import Pass
 from app.database import db
 from fastapi import HTTPException, status
-from app import schemas
-from sqlalchemy.orm.session import Session
+from app.models import Permission, Role, Modules, AccessName
+from sqlalchemy.sql import func
 from typing import List
 from app.models import Modules
 
@@ -16,6 +16,19 @@ def create_module(module_name, db):
         create_module = Modules(name=module_name.title())
         db.add(create_module)
         db.commit()
+
+        roles = db.query(Role).all()
+        for role in roles:
+            if role.name == "Admin":
+                permission = Permission(
+                    role_id=role.id, module_id= create_module.id, access_type=AccessName.READ_WRITE.value)
+                db.add(permission)
+                db.commit()
+            else:
+                permission = Permission(
+                    role_id=role.id, module_id= create_module.id, access_type=AccessName.READ.value)
+                db.add(permission)
+                db.commit()    
         return create_module
 
     else:
