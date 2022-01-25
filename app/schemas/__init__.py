@@ -51,7 +51,15 @@ class Reqsignup(BaseModel):
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="confirm password not match to the password field")
         return confirm_password
 
-    
+    class Config():
+        orm_mode = True
+
+class Getadmin(BaseModel):
+    id: int
+    name: Optional[str]
+    address: Optional[str]
+    email: Optional[str]
+
     class Config():
         orm_mode = True
 
@@ -66,8 +74,8 @@ class Getsignup(BaseModel):
         orm_mode = True
 
 class Update_user(BaseModel):
-    name: Optional[str]
-    address: Optional[str]
+    name: str
+    address: str
 
     contains_special_char = validator("name", allow_reuse=True)(
         should_not_contains_special_char)

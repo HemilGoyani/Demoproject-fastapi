@@ -1,26 +1,27 @@
 import enum
+from typing import Sequence
+from xmlrpc.client import DateTime, boolean
 from pydantic import BaseModel
 from app.database.db import Base
-from sqlalchemy import (Boolean, Column, Date, DateTime, Float, ForeignKey,
-                        Integer, String, Text, UniqueConstraint)
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey,
+                        Integer, String, Sequence)
 from sqlalchemy.orm import relationship
 from app.database.db import Base
 from sqlalchemy.types import Enum
 
- 
 
-    
 class Usersignup(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String,index=True)
-    address = Column(String,index=True)
+    name = Column(String, index=True)
+    address = Column(String, index=True)
     email = Column(String, unique=True, index=True)
-    password = Column(String,index=True)
-    
+    password = Column(String, index=True)
+    isAdmin = Column(Boolean)
+
     user = relationship('UserRole', back_populates='user')
-   
+
 
 class Brand(Base):
     __tablename__ = 'brands'
@@ -28,10 +29,11 @@ class Brand(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     active = Column(Boolean, default=True)
-    
+
     products = relationship(
         "Product", back_populates="brand")
-           
+
+
 class Product(Base):
     __tablename__ = 'products'
 
@@ -42,16 +44,16 @@ class Product(Base):
 
     brand = relationship("Brand", back_populates="products")
 
+
 class Role(Base):
     __tablename__ = "roles"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String,unique=True, index=True)
+    name = Column(String, unique=True, index=True)
     active = Column(Boolean, default=True)
-    
+
     permissions = relationship('Permission', back_populates='roles')
-    
-    
+
 
 class UserRole(Base):
     __tablename__ = "user_role"
@@ -60,9 +62,9 @@ class UserRole(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     role_name = Column(String, index=True)
 
-    user = relationship('Usersignup',back_populates='user')
-    
-   
+    user = relationship('Usersignup', back_populates='user')
+
+
 class Modules(Base):
     __tablename__ = "modules"
 
@@ -71,10 +73,12 @@ class Modules(Base):
 
     permission = relationship("Permission", back_populates="module")
 
+
 class AccessName(enum.Enum):
     READ = "READ"
     READ_WRITE = "READ_WRITE"
-    
+
+
 class Permission(Base):
     __tablename__ = "permissions"
 
@@ -85,6 +89,13 @@ class Permission(Base):
 
     roles = relationship("Role", back_populates='permissions')
     module = relationship("Modules", back_populates="permission")
-    
 
-   
+
+class Email_token(Base):
+    __tablename__ = "email_token"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(50), index=True)
+    reset_code = Column(String(50), index=True)
+    status = Column(Boolean, default=True)
+    expired_in = Column(DateTime)
