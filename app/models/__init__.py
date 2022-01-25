@@ -18,7 +18,7 @@ class Usersignup(Base):
     address = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String, index=True)
-    isAdmin = Column(Boolean)
+    isAdmin = Column(Boolean, default=False)
 
     user = relationship('UserRole', back_populates='user')
 
@@ -53,17 +53,17 @@ class Role(Base):
     active = Column(Boolean, default=True)
 
     permissions = relationship('Permission', back_populates='roles')
-
+    
 
 class UserRole(Base):
     __tablename__ = "user_role"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    role_name = Column(String, index=True)
+    role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
 
     user = relationship('Usersignup', back_populates='user')
-
+   
 
 class Modules(Base):
     __tablename__ = "modules"
@@ -77,6 +77,7 @@ class Modules(Base):
 class AccessName(enum.Enum):
     READ = "READ"
     READ_WRITE = "READ_WRITE"
+    
 
 
 class Permission(Base):
@@ -99,3 +100,4 @@ class Email_token(Base):
     reset_code = Column(String(50), index=True)
     status = Column(Boolean, default=True)
     expired_in = Column(DateTime)
+

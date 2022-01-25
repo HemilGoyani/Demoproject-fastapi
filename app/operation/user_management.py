@@ -1,5 +1,7 @@
 import binascii
 import hashlib
+
+from mysqlx import Session
 from app.database import db
 from fastapi import HTTPException, status
 from typing import List
@@ -15,12 +17,29 @@ def create_users(user, db):
     getfirst = existuser.first()
 
     if not getfirst:
-        
+
         create_user = Usersignup(name=user.name, address=user.address,
-                                 email=user.email, password= hash_password.hexdigest(),isAdmin = False)
+                                 email=user.email, password=hash_password.hexdigest(), isAdmin=user.isAdmin)
         db.add(create_user)
         db.commit()
 
+        from sqlalchemy.sql import func
+
+
+        qry = db.query(func.max(Usersignup.id).label("max_id"),)
+        res = qry.one()
+        max_id = res.max_id
+
+        if user.isAdmin == True:
+            admin= db.query(Role).filter(Role.name == "Admin").first()
+            user_role= UserRole(user_id=max_id, role_id= admin.id)
+            
+        else:
+            user= db.query(Role).filter(Role.name == "User").first()
+            user_role= UserRole(user_id=max_id, role_id= user.id)
+
+        db.add(user_role)
+        db.commit()   
         return create_user
     else:
         raise HTTPException(
@@ -79,23 +98,16 @@ def assign_role(user_id, role_name, db):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"user {user_id} is not found")
 
-    existrole = db.query(UserRole).filter(
-        UserRole.user_id == user_id, UserRole.role_name == role_name.title())
-    getfirst = existrole.first()
+    check_role = db.query(Role).filter(
+        Role.name == role_name.title()).first()
 
-    if not getfirst:
-        check_role = db.query(Role).filter(
-            Role.name == role_name.title()).first()
-
-        if check_role:
-            assign_role = UserRole(
-                user_id=user_id, role_name=role_name.title())
-            db.add(assign_role)
-            db.commit()
-            return assign_role
-        else:
-            raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
-                                detail=f"role name {role_name} is not exist")
+    if check_role:
+        assign_role = UserRole(
+            user_id=user_id, role_id= check_role.id)
+        db.add(assign_role)
+        db.commit()
+        return assign_role
     else:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
-                            detail=f"allready role {role_name} is assign to the {user_id} id")
+                            detail=f"role name {role_name} is not exist")
+    

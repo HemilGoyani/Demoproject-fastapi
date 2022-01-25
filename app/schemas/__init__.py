@@ -6,6 +6,7 @@ from pydantic import BaseModel, validator
 from fastapi import HTTPException, status
 import re
 from pyrsistent import optional
+from sqlalchemy import false
 
 from typer import Option
 
@@ -38,6 +39,7 @@ class Reqsignup(BaseModel):
     email: str
     password:str
     confirm_password: str
+    isAdmin: bool = False
 
     contains_special_char = validator("name", allow_reuse=True)(
         should_not_contains_special_char)
@@ -137,7 +139,7 @@ class Getroles(BaseModel):
 class Getuser_role(BaseModel):
     id:Optional[int]
     user_id: Optional[int]
-    role_name: Optional[str]  
+    role_id: Optional[int]  
 
     class Config():
         orm_mode = True
