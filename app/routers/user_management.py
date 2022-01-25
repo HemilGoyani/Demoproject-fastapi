@@ -19,8 +19,8 @@ async def getall_users(db: Session = Depends(get_db)):
 
 
 @router.get('/user_management/getuser_id', response_model=schemas.Getsignup)
-async def getuserbyid(admin_id:int,user_id: int, db: Session = Depends(get_db)):
-    return user_management.getuser_id(admin_id,user_id, db)
+async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
+    return user_management.getuser_id(user_id, db)
 
 @router.post('/user_management/assign_role', response_model= schemas.Getuser_role)
 async def assign_role(user_id: int,role_name: str, db: Session = Depends(get_db)):

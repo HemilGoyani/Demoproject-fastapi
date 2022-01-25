@@ -11,9 +11,9 @@ def create_product(id, product, db):
     get_productid = db.query(Brand).filter(Brand.id == id).first()
     if get_productid:
         exist_product = db.query(Product).filter(
-            Product.brand_id == id, Product.name == product.name)
-        get_firts = exist_product.first()
-        if not get_firts:
+            Product.brand_id == id, Product.name == product.name).first()
+
+        if not exist_product:
             create_product = Product(
                 brand_id=id, name=product.name, active=product.active)
             db.add(create_product)

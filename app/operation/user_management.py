@@ -5,13 +5,13 @@ from mysqlx import Session
 from app.database import db
 from fastapi import HTTPException, status
 from typing import List
-from app.models import Role, Usersignup, UserRole,Permission,Modules,AccessName
+from app.models import Role, Usersignup, UserRole, Permission, Modules, AccessName
 from sqlalchemy.sql import func
 get_db = db.get_db
 
 
 def create_users(user, db):
-    #password convert to hashpassword
+    # password convert to hashpassword
     hash_password = hashlib.md5(user.password.encode())
 
     # check the user are exist or not
@@ -20,28 +20,21 @@ def create_users(user, db):
     getfirst = existuser.first()
 
     if not getfirst:
-        #create user
+        # create user
         create_user = Usersignup(name=user.name, address=user.address,
                                  email=user.email, password=hash_password.hexdigest(), isAdmin=user.isAdmin)
         db.add(create_user)
         db.commit()
 
-        qry = db.query(func.max(Usersignup.id).label("max_id"),)
-        res = qry.one()
-        max_id = res.max_id
-
-        # get all modules
-        modules = db.query(Modules).all()
-
-        #add user_role table
+        # add user_role table
         if user.isAdmin == True:
             admin = db.query(Role).filter(Role.name == "Admin").first()
-            user_role = UserRole(user_id=max_id, role_id=admin.id)
-            
+            user_role = UserRole(user_id=create_user.id, role_id=admin.id)
+
         else:
             user = db.query(Role).filter(Role.name == "User").first()
-            user_role = UserRole(user_id=max_id, role_id=user.id)
-            
+            user_role = UserRole(user_id=create_user.id, role_id=user.id)
+
         db.add(user_role)
         db.commit()
         return create_user

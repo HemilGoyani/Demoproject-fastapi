@@ -9,10 +9,9 @@ from app.models import Brand, Product
 
 def create_brand(brand, db):
     existbrand = db.query(Brand).filter(
-        Brand.name == brand.name, Brand.active == brand.active)
-    getfirst = existbrand.first()
+        Brand.name == brand.name, Brand.active == brand.active).first()
 
-    if not getfirst:
+    if not existbrand:
         create_brand = Brand(name=brand.name, active=brand.active)
         db.add(create_brand)
         db.commit()
@@ -31,13 +30,15 @@ def getall_brand(db):
             status_code=status.HTTP_404_NOT_FOUND, detail="Brand is not present")
     return get_brand
 
-def getaid_brand(brand_id,db):
+
+def getaid_brand(brand_id, db):
     get_brand = db.query(Brand).filter(Brand.id == brand_id).first()
-    
+
     if not get_brand:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Brand id {brand_id} not present")
     return get_brand
+
 
 def update_brand(id, brand, db):
     get_brand = db.query(Brand).filter(Brand.id == id)
@@ -63,7 +64,7 @@ def delete_brand(id, db):
     if not get_firts:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Brand id {id} is not found")
-    exist_brand= db.query(Product).filter(Product.brand_id == id).first()
+    exist_brand = db.query(Product).filter(Product.brand_id == id).first()
     if not exist_brand:
         brand.delete(synchronize_session=False)
         db.commit()

@@ -7,12 +7,18 @@ from typing import List
 from app.models import Modules
 
 
+def permission(role_id, module_id, access_name, db):
+    permission = Permission(
+        role_id=role_id, module_id=module_id, access_type=access_name)
+    db.add(permission)
+    db.commit()
+
+
 def create_module(module_name, db):
     exist_module = db.query(Modules).filter(
-        Modules.name == module_name.title())
-    getfirst = exist_module.first()
+        Modules.name == module_name.title()).first()
 
-    if not getfirst:
+    if not exist_module:
         create_module = Modules(name=module_name.title())
         db.add(create_module)
         db.commit()
@@ -20,20 +26,17 @@ def create_module(module_name, db):
         roles = db.query(Role).all()
         for role in roles:
             if role.name == "Admin":
-                permission = Permission(
-                    role_id=role.id, module_id= create_module.id, access_type=AccessName.READ_WRITE.value)
-                db.add(permission)
-                db.commit()
+                permission(role.id, create_module.id,
+                           AccessName.READ_WRITE.value, db)
             else:
-                permission = Permission(
-                    role_id=role.id, module_id= create_module.id, access_type=AccessName.READ.value)
-                db.add(permission)
-                db.commit()    
+                permission(role.id, create_module.id,
+                           AccessName.READ.value, db)
         return create_module
 
     else:
         raise HTTPException(
             status_code=status.HTTP_207_MULTI_STATUS, detail=f"allready module {module_name} is exist")
+
 
 def get_module(db):
     exist_module = db.query(Modules).all()
