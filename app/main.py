@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import products, brands, admin, users, permission,modules, user_management,role
+from app.routers import products, brands, users, permission,modules, user_management,role
 
 app = FastAPI()
 
