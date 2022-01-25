@@ -17,7 +17,7 @@ def create_users(user, db):
     if not getfirst:
         
         create_user = Usersignup(name=user.name, address=user.address,
-                                 email=user.email, password= hash_password.hexdigest())
+                                 email=user.email, password= hash_password.hexdigest(),isAdmin = False)
         db.add(create_user)
         db.commit()
 

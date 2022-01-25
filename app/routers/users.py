@@ -17,7 +17,7 @@ async def login(email: str, password: str, db: Session = Depends(get_db)):
 
 @router.post('/user/forgot_password/sent_email')
 async def forgot_paswords(request: Request,user_id: int, email:str,db: Session = Depends(get_db)):
-    return users.forgot_paswords_email_sent(user_id, email, db)
+    return await users.forgot_paswords_email_sent(user_id, email, db)
 
 
 @router.put('/user/change_password',status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
