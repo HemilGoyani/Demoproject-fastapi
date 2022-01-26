@@ -62,7 +62,7 @@ class UserRole(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
 
-    user = relationship('Usersignup', back_populates='user')
+    user = relationship('Usersignup',back_populates='user')
    
 
 class Modules(Base):

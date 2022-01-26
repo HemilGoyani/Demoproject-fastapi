@@ -1,4 +1,5 @@
 
+from logging import raiseExceptions
 from fastapi import HTTPException, status
 from sqlalchemy.orm.session import Session
 from app.models import Permission, Role, Modules, AccessName
@@ -44,3 +45,13 @@ def get_role(db):
             status_code=status.HTTP_404_NOT_FOUND, detail='role are not exist')
 
     return exist_role
+
+def delete_role(role_id,db):
+    check_roles = db.query(Role).filter(Role.id == role_id)
+    check_roles = check_roles.first()
+    if not check_roles:
+       raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'role_id {role_id} is not found')
+
+    check_roles.delete(synchronize_session=False)
+    db.commit()
+    return {"detail": f"user id {role_id} is deleted"}

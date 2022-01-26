@@ -81,6 +81,7 @@ class Getsignup(BaseModel):
 class Update_user(BaseModel):
     name: str
     address: str
+    role_id: str
 
     contains_special_char = validator("name", allow_reuse=True)(
         should_not_contains_special_char)
