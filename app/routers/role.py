@@ -22,6 +22,6 @@ async def create_role(db: Session = Depends(get_db)):
 async def delete_role(role_id: int,db: Session = Depends(get_db)):
     return role.delete_role(role_id,db)
 
-@router.get('/role/get_role_permission') 
+@router.get('/role/get_role_permission',response_model= List[schemas.Getrole_permission]) 
 async def get_role_permission(role_id: int, db: Session = Depends(get_db)):  
     return role.get_role_permission(role_id,db)

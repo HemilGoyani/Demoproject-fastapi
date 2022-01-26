@@ -153,13 +153,7 @@ async def forgot_paswords_email_sent(user_id, email, db):
     subject = "forgot password"
     recipient = [email]
     message = """
-    <html>
-        <body>
-            <div>
-                <h1>passsword reset token:{0}</h1>               
-            </div>
-        </body>
-    </html>
+        passsword reset token:{0}                    
     """.format(reset_code)
 
     await utils.email.send_email(subject, recipient, message)

@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 import re
 from pyrsistent import optional
 from sqlalchemy import false
+from app.models import AccessName
 
 from typer import Option
 
@@ -157,11 +158,11 @@ class Reset_password(BaseModel):
     class Config():
         orm_mode = True
 
-# class Getrole_permission(BaseModel):
-#     access_type:Optional[str]
-#     id: Optional[int]
-#     module_name: Optional[int]
-#     role_id: Optional[int]
+class Getrole_permission(BaseModel):
+    access_type:Optional[AccessName]
+    id: Optional[int]
+    module_name: Optional[str]
+    role_id: Optional[int]
 
-#     class Config():
-#         orm_mode = True
+    class Config():
+        orm_mode = True
