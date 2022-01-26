@@ -26,25 +26,18 @@ def create_users(user, db):
             if not check_role_id:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
-        
+
         create_user = Usersignup(name=user.name, address=user.address,
-                                     email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
+                                 email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
         db.add(create_user)
         db.commit()
+
+        # user_role enter data
+        for role in role_id:
+            user_role = UserRole(user_id=create_user.id, role_id=role)
+            db.add(user_role)
+            db.commit()
         return create_user
-        # # add user_role table
-        # if user.isAdmin == True:
-        #     admin = db.query(Role).filter(Role.name == "Admin").first()
-        #     user_role = UserRole(user_id=create_user.id, role_id=admin.id)
-
-        # else:
-        #     user = db.query(Role).filter(Role.name == "User").first()
-        #     user_role = UserRole(user_id=create_user.id, role_id=user.id)
-
-        # db.add(user_role)
-        # db.commit()
-
-        
     else:
         raise HTTPException(
             status_code=status.HTTP_207_MULTI_STATUS, detail="allready email is exist")
@@ -119,3 +112,5 @@ def assign_role(user_id, role_name, db):
     else:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
                             detail=f"role name {role_name} is not exist")
+
+

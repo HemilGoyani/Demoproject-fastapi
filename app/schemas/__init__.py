@@ -30,7 +30,7 @@ def validate_emails(cls, email):
 def should_not_empty(cls, string):
     return_str = string.strip()
     if not return_str:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="empty name not accept")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="empty name or role_id, address not accept")
     return return_str
 
 class Reqsignup(BaseModel):
@@ -46,12 +46,16 @@ class Reqsignup(BaseModel):
     validate_email = validator(
         'email', allow_reuse=True)(validate_emails)
 
+    
+    _role_id =validator("role_id",allow_reuse=True)(should_not_empty)
+    _address = validator("address",allow_reuse=True)(should_not_empty)
     @validator('confirm_password')
     def passwords_match(cls, confirm_password, values, **kwargs):
         if 'password' in values and confirm_password != values['password']:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="confirm password not match to the password field")
         return confirm_password
 
+    
     class Config():
         orm_mode = True
 
@@ -139,6 +143,15 @@ class Getuser_role(BaseModel):
     id:Optional[int]
     user_id: Optional[int]
     role_id: Optional[int]  
+
+    class Config():
+        orm_mode = True
+
+
+class Reset_password(BaseModel):
+    reset_password_token: str
+    new_password: str
+    confirm_new_password: str        
 
     class Config():
         orm_mode = True
