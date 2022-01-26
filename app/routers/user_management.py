@@ -66,3 +66,7 @@ async def change_password(id: int, oldpassword: str, newpassword: str, confirm_n
 @router.get('/user_management/get_user_permission')
 async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
     return user_management.getuser_permission(user_id, db)
+
+@router.put('/user_management/update_user_role_permission')
+async def update_user_role_permission(user_id: int, role_id: str, data:schemas.Change_permissionm, db: Session = Depends(get_db)):
+    return user_management.update_user_role_permission(user_id,role_id,data,db)

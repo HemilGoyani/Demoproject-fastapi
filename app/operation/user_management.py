@@ -1,5 +1,6 @@
 import hashlib
 import datetime
+from multiprocessing import synchronize
 from app.database import db
 from fastapi import HTTPException, status
 from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup
@@ -205,7 +206,7 @@ def reset_password(email, new_password, db):
     getuser.update({"password": hash_password.hexdigest()})
     db.commit()
     disable_token = db.query(Email_token).filter(Email_token.email == email)
-    disable_token.update({"status": False})
+    disable_token.delete(synchronize_session=False)
     db.commit()
     return user
 
@@ -219,6 +220,23 @@ def getuser_permission(user_id, db):
     role_id = get_user.role_id.split(",")
     role_permission = []
     for role in role_id:
-        get_permission = db.query(Permission).filter(Permission.role_id == role).all()
+        get_permission = db.query(Permission).filter(
+            Permission.role_id == role).all()
         role_permission.append(get_permission)
     return role_permission
+
+
+def update_user_role_permission(user_id, role_id, data, db):
+    get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
+    user = get_user.first()
+    
+    if not user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            detail=f"user id {user_id} not found")
+    roles = user.role_id.split(",")
+    if role_id in roles:
+        # chk = db.query(Permission).filter(Permission.role_id == role_id, Permission.module_id== data.module_id).all()
+        # chk.update({"module_id":data.module_id,"access_type": data.access_type}})
+        return "brabr"
+    raise HTTPException(status.HTTP_404_NOT_FOUND, detail= "role_id is not valid for this user")    
+    

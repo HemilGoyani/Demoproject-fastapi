@@ -4,7 +4,7 @@ from xmlrpc.client import DateTime, boolean
 from pydantic import BaseModel
 from app.database.db import Base
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey,
-                        Integer, String, Sequence)
+                        Integer, String)
 from sqlalchemy.orm import relationship
 from app.database.db import Base
 from sqlalchemy.types import Enum

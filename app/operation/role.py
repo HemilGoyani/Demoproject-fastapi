@@ -1,5 +1,6 @@
 
 from logging import raiseExceptions
+from multiprocessing import synchronize
 from fastapi import HTTPException, status
 from sqlalchemy.orm.session import Session
 from app.models import Permission, Role, Modules, AccessName, UserRole
@@ -49,18 +50,24 @@ def get_role(db):
 
 def delete_role(role_id, db):
     check_roles = db.query(Role).filter(Role.id == role_id)
-    check_roles = check_roles.first()
-    if not check_roles:
+    check_role = check_roles.first()
+    if not check_role:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f'role_id {role_id} is not found')
     else:
-        user_role = db.query(UserRole).filter(role_id == role_id).first()
-        if user_role:
-            raise HTTPException(status.HTTP_207_MULTI_STATUS,
-                                detail=f"role {role_id} is reference to the user_role table, not deleted")
-        check_roles.delete(synchronize_session=False)
-        db.commit()
-        return {"detail": f"user id {role_id} is deleted"}
+        user_role = db.query(UserRole).filter(
+            UserRole.role_id == role_id).first()
+        if not user_role:
+            permission_roles = db.query(Permission).filter(
+                Permission.role_id == role_id)
+            permission_roles.delete(synchronize_session=False)
+            db.commit()
+
+            check_roles.delete(synchronize_session=False)
+            db.commit()
+            return {"detail": f"Role id {role_id} is deleted"}
+        raise HTTPException(status.HTTP_207_MULTI_STATUS,
+                            detail=f"Role is assigned to the user, not deleted")
 
 
 def get_role_permission(role_id, db):

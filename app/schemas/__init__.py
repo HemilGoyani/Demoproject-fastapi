@@ -80,7 +80,7 @@ class Getsignup(BaseModel):
         orm_mode = True
 
 class Update_user(BaseModel):
-    name: str
+    name:  str
     address: str
     role_id: str
 
@@ -166,3 +166,11 @@ class Getrole_permission(BaseModel):
 
     class Config():
         orm_mode = True
+
+
+class Change_permissionm(BaseModel):
+    module_id: int
+    access_type: AccessName       
+
+    class Config():
+        orm_mode = True        
