@@ -1,4 +1,5 @@
 from ast import Pass
+from multiprocessing import synchronize
 from app.database import db
 from fastapi import HTTPException, status
 from app.models import Permission, Role, Modules, AccessName
@@ -44,3 +45,32 @@ def get_module(db):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"module not exist")
     return exist_module
+
+
+def delete_module(module_id, db):
+    module = db.query(Modules).filter(Modules.id == module_id)
+    first_module = module.first()
+    if not first_module:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            detail=f" module id {module_id} is not found")
+    permission_check = db.query(Permission).filter(
+        Permission.module_id == module_id)
+    permission_check.delete(synchronize_session=False)
+    db.commit()
+
+    module.delete(synchronize_session=False)
+    db.commit()
+    return f"module {module_id} is deleted"
+
+
+def get_module_permission(module_id, db):
+    # check module_id exist or not
+    check_module = db.query(Modules).filter(Modules.id == module_id).first()
+    if not check_module:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            detail=f'module_id {module_id} is not found')
+
+    # get module permission
+    get_module_permission = db.query(Permission).filter(
+        Permission.module_id == module_id).all()
+    return get_module_permission

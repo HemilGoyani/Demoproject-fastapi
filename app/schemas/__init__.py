@@ -156,3 +156,12 @@ class Reset_password(BaseModel):
 
     class Config():
         orm_mode = True
+
+# class Getrole_permission(BaseModel):
+#     access_type:Optional[str]
+#     id: Optional[int]
+#     module_name: Optional[int]
+#     role_id: Optional[int]
+
+#     class Config():
+#         orm_mode = True

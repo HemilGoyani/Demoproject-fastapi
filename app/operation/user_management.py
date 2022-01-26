@@ -2,9 +2,10 @@ import hashlib
 import datetime
 from app.database import db
 from fastapi import HTTPException, status
-from app.models import Role, Usersignup, UserRole, Email_token, Usersignup
+from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup
 from sqlalchemy.sql import func
 import uuid
+from app.operation.modules import permission
 import utils.email
 get_db = db.get_db
 
@@ -60,8 +61,27 @@ def getuser_id(id, db):
     return user
 
 
+def user_role(new_role_id, old_role_id, user_id, db):
+    role_add = list(new_role_id.difference(old_role_id))
+    role_detete = list(old_role_id.difference(new_role_id))
+
+    if role_add:
+        for role in role_add:
+            add_role = UserRole(user_id=user_id, role_id=role)
+            db.add(add_role)
+            db.commit()
+
+    if role_detete:
+        for role in role_detete:
+            user_role = db.query(UserRole).filter(
+                UserRole.user_id == user_id, UserRole.role_id == role)
+            user_role.delete(synchronize_session=False)
+            db.commit()
+
+
 def update_user(user_id, data, db):
 
+    # check user exist or not
     getuser = db.query(Usersignup).filter(Usersignup.id == user_id)
     user = getuser.first()
 
@@ -69,6 +89,7 @@ def update_user(user_id, data, db):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
 
+    # role_id split and checked
     role_id = data.role_id.split(",")
     for role in role_id:
         check_role_id = db.query(Role).filter(Role.id == role).first()
@@ -76,13 +97,9 @@ def update_user(user_id, data, db):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
 
-    delete_roles = db.query(UserRole).filter(UserRole.user_id == user_id)
-    delete_roles.delete(synchronize_session=False)
-    db.commit()
-    for role in role_id:
-        user_role = UserRole(user_id=user_id, role_id=role)
-        db.add(user_role)
-        db.commit()
+    user_role(set(data.role_id.split(",")), set(
+        user.role_id.split(",")), user_id, db)
+
     getuser.update(
         {"name": data.name, "address": data.address, "role_id": data.role_id})
     db.commit()
@@ -194,10 +211,20 @@ def reset_password(email, new_password, db):
     getuser.update({"password": hash_password.hexdigest()})
     db.commit()
     disable_token = db.query(Email_token).filter(Email_token.email == email)
-    # get_email = disable_token.first()
-    # if not get_email:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
     disable_token.update({"status": False})
     db.commit()
     return user
+
+
+def getuser_permission(user_id, db):
+    get_user = db.query(Usersignup).filter(Usersignup.id == user_id).first()
+
+    if not get_user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            detail=f"user id {user_id} not found")
+    role_id = get_user.role_id.split(",")
+    role_permission = []
+    for role in role_id:
+        get_permission = db.query(Permission).filter(Permission.role_id == role).all()
+        role_permission.append(get_permission)
+    return role_permission

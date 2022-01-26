@@ -9,9 +9,11 @@ router = APIRouter(tags=['User Management'])
 
 get_db = db.get_db
 
+
 @router.post('/user_management/create_user', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
 async def create_users(user: schemas.Reqsignup, db: Session = Depends(get_db)):
-    return user_management.create_users(user,db)
+    return user_management.create_users(user, db)
+
 
 @router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
 async def getall_users(db: Session = Depends(get_db)):
@@ -22,6 +24,7 @@ async def getall_users(db: Session = Depends(get_db)):
 async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
     return user_management.getuser_id(user_id, db)
 
+
 @router.put('/user_management/user_update', response_model=schemas.Getsignup)
 async def update_user(user_id: int, data: schemas.Update_user, db: Session = Depends(get_db)):
     return user_management.update_user(user_id, data, db)
@@ -30,6 +33,7 @@ async def update_user(user_id: int, data: schemas.Update_user, db: Session = Dep
 @router.delete('/user_management/user_delete')
 async def remove(user_id: int, db: Session = Depends(get_db)):
     return user_management.remove(user_id, db)
+
 
 @router.post('/user/signin', response_model=schemas.Getsignup)
 async def login(email: str, password: str, db: Session = Depends(get_db)):
@@ -41,7 +45,7 @@ async def forgot_paswords(user_id: int, email: str, db: Session = Depends(get_db
     return await user_management.forgot_paswords_email_sent(user_id, email, db)
 
 
-@router.put('/user/reset-password',response_model=schemas.Getsignup)
+@router.put('/user/reset-password', response_model=schemas.Getsignup)
 async def reset_password(request: schemas.Reset_password, db: Session = Depends(get_db)):
     reset_token = user_management.check_reset_password_token(
         request.reset_password_token, db)
@@ -51,7 +55,7 @@ async def reset_password(request: schemas.Reset_password, db: Session = Depends(
     if request.new_password != request.confirm_new_password:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail="new password and confirm new password is not mach")
-    return user_management.reset_password(reset_token.email,request.new_password,db)
+    return user_management.reset_password(reset_token.email, request.new_password, db)
 
 
 @router.put('/user/change_password', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
@@ -59,7 +63,6 @@ async def change_password(id: int, oldpassword: str, newpassword: str, confirm_n
     return user_management.change_password(id, oldpassword, newpassword, confirm_new_password, db)
 
 
-
-
-
-
+@router.get('/user_management/get_user_permission')
+async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
+    return user_management.getuser_permission(user_id, db)
