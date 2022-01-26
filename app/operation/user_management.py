@@ -16,28 +16,35 @@ def create_users(user, db):
 
     # check the user are exist or not
     existuser = db.query(Usersignup).filter(
-        Usersignup.email == user.email, Usersignup.password == hash_password.hexdigest())
-    getfirst = existuser.first()
+        Usersignup.email == user.email, Usersignup.password == hash_password.hexdigest()).first()
 
-    if not getfirst:
+    if not existuser:
         # create user
+        role_id = user.role_id.split(",")
+        for role in role_id:
+            check_role_id = db.query(Role).filter(Role.id == role).first()
+            if not check_role_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
+        
         create_user = Usersignup(name=user.name, address=user.address,
-                                 email=user.email, password=hash_password.hexdigest(), isAdmin=user.isAdmin)
+                                     email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
         db.add(create_user)
         db.commit()
-
-        # add user_role table
-        if user.isAdmin == True:
-            admin = db.query(Role).filter(Role.name == "Admin").first()
-            user_role = UserRole(user_id=create_user.id, role_id=admin.id)
-
-        else:
-            user = db.query(Role).filter(Role.name == "User").first()
-            user_role = UserRole(user_id=create_user.id, role_id=user.id)
-
-        db.add(user_role)
-        db.commit()
         return create_user
+        # # add user_role table
+        # if user.isAdmin == True:
+        #     admin = db.query(Role).filter(Role.name == "Admin").first()
+        #     user_role = UserRole(user_id=create_user.id, role_id=admin.id)
+
+        # else:
+        #     user = db.query(Role).filter(Role.name == "User").first()
+        #     user_role = UserRole(user_id=create_user.id, role_id=user.id)
+
+        # db.add(user_role)
+        # db.commit()
+
+        
     else:
         raise HTTPException(
             status_code=status.HTTP_207_MULTI_STATUS, detail="allready email is exist")
@@ -76,15 +83,20 @@ def update_user(user_id, data, db):
 
 
 def remove(user_id, db):
+    user_role = db.query(UserRole).filter(UserRole.user_id == user_id).first()
+    if not user_role:
+        user = db.query(Usersignup).filter(Usersignup.id == user_id)
+        users = user.first()
 
-    user = db.query(Usersignup).filter(Usersignup.id == user_id)
-    users = user.first()
-    if not users:
+        if not users:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"id {user_id} is not found")
+        user.delete(synchronize_session=False)
+        db.commit()
+        return {"detail": f"user id {user_id} is deleted"}
+    else:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"id {user_id} is not found")
-    user.delete(synchronize_session=False)
-    db.commit()
-    return {"detail": f"user id {user_id} is deleted"}
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"id {user_id} is not deleted, foreign key appy to the user_role table")
 
 
 def assign_role(user_id, role_name, db):

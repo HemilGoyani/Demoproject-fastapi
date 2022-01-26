@@ -23,7 +23,7 @@ def validate_emails(cls, email):
     if email:
         for email in email.split(','):
             if not re.fullmatch(regex, email.strip()):
-                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="envalid email")
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="email is not valid")
         return email
     return email
 
@@ -39,8 +39,7 @@ class Reqsignup(BaseModel):
     email: str
     password:str
     confirm_password: str
-    isAdmin: bool = False
-
+    role_id: str
     contains_special_char = validator("name", allow_reuse=True)(
         should_not_contains_special_char)
 
@@ -71,7 +70,7 @@ class Getsignup(BaseModel):
     address: Optional[str]
     email: Optional[str]
     password:Optional[str]
-
+    role_id: Optional[str]
     class Config():
         orm_mode = True
 
