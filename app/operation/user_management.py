@@ -1,12 +1,13 @@
 import hashlib
 import datetime
-from multiprocessing import synchronize
+from modulefinder import Module
+from typing import List
+from app import models
 from app.database import db
 from fastapi import HTTPException, status
-from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup
+from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup, Modules, AccessName
 from sqlalchemy.sql import func
 import uuid
-from app.operation.modules import permission
 import utils.email
 get_db = db.get_db
 
@@ -218,38 +219,47 @@ def getuser_permission(user_id, db):
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f"user id {user_id} not found")
     role_id = get_user.role_id.split(",")
-    
-    for role in role_id:
+    record = []
+
+    module_list = db.query(Modules).all()
+
+    for module in module_list:
         get_permission = db.query(Permission).filter(
-            Permission.role_id == role).all()
-        record = []
-        for permission in get_permission:
-            
-            data=({
-                "id": permission.id,
-                "module_name": permission.module.name,
-                "access_type": permission.access_type
-            })
-            record.append(data)
-    record.sort(key=lambda x: str(x["access_type"]))
+            Permission.role_id.in_(role_id), Permission.module_id == module.id).all()
+        dic = {
+            "module_name": module.name,
+            "access_type": models.AccessName.NONE
+        }
+        for data in get_permission:
+            if data.access_type.value == AccessName.READ_WRITE.value:
+                dic.update({
+                    "access_type": data.access_type
+                })
+                break
+            elif data.access_type.value == AccessName.READ.value:
+                dic.update({
+                    "access_type": data.access_type
+                })
+        record.append(dic)
     return record
+
 
 def update_user_role_permission(user_id, role_id, data, db):
     get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
     user = get_user.first()
-    print(user.__dict__,"print data")
+    print(user.__dict__, "print data")
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f"user id {user_id} not found")
     roles = user.role_id.split(",")
     if str(role_id) in roles:
-        print(role_id,"role id checked")
-        check_permission = db.query(Permission).filter(Permission.role_id == role_id, Permission.module_id == data.module_id)
+        print(role_id, "role id checked")
+        check_permission = db.query(Permission).filter(
+            Permission.role_id == role_id, Permission.module_id == data.module_id)
         check = check_permission.first()
         check_permission.update({"access_type": data.access_type})
         db.commit()
         return f"permission is changed"
-        
-        
-    raise HTTPException(status.HTTP_404_NOT_FOUND, detail= "role_id is not valid for this user")    
-    
+
+    raise HTTPException(status.HTTP_404_NOT_FOUND,
+                        detail="role_id is not valid for this user")

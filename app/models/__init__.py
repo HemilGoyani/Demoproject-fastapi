@@ -77,6 +77,7 @@ class Modules(Base):
 class AccessName(enum.Enum):
     READ = "READ"
     READ_WRITE = "READ_WRITE"
+    NONE = "NONE"
 
 
 class Permission(Base):
