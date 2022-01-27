@@ -218,25 +218,38 @@ def getuser_permission(user_id, db):
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f"user id {user_id} not found")
     role_id = get_user.role_id.split(",")
-    role_permission = []
+    
     for role in role_id:
         get_permission = db.query(Permission).filter(
             Permission.role_id == role).all()
-        role_permission.append(get_permission)
-    return role_permission
-
+        record = []
+        for permission in get_permission:
+            
+            data=({
+                "id": permission.id,
+                "module_name": permission.module.name,
+                "access_type": permission.access_type
+            })
+            record.append(data)
+    record.sort(key=lambda x: str(x["access_type"]))
+    return record
 
 def update_user_role_permission(user_id, role_id, data, db):
     get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
     user = get_user.first()
-    
+    print(user.__dict__,"print data")
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f"user id {user_id} not found")
     roles = user.role_id.split(",")
-    if role_id in roles:
-        # chk = db.query(Permission).filter(Permission.role_id == role_id, Permission.module_id== data.module_id).all()
-        # chk.update({"module_id":data.module_id,"access_type": data.access_type}})
-        return "brabr"
+    if str(role_id) in roles:
+        print(role_id,"role id checked")
+        check_permission = db.query(Permission).filter(Permission.role_id == role_id, Permission.module_id == data.module_id)
+        check = check_permission.first()
+        check_permission.update({"access_type": data.access_type})
+        db.commit()
+        return f"permission is changed"
+        
+        
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail= "role_id is not valid for this user")    
     

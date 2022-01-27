@@ -18,7 +18,7 @@ class Usersignup(Base):
     address = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String, index=True)
-    role_id = Column(String(50), index=True)
+    role_id = Column(String(50), index=True, default= "None")
 
     user = relationship('UserRole', back_populates='user')
 

@@ -174,3 +174,11 @@ class Change_permissionm(BaseModel):
 
     class Config():
         orm_mode = True        
+
+class Getuser_permission(BaseModel):
+    access_type:Optional[AccessName]
+    id: Optional[int]
+    module_name: Optional[str]
+
+    class Config():
+        orm_mode = True        
