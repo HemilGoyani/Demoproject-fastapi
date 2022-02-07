@@ -80,8 +80,8 @@ class Getsignup(BaseModel):
         orm_mode = True
 
 class Update_user(BaseModel):
-    name:  str
-    address: str
+    name: Optional[str] = None
+    address: Optional[str] = None
     role_id: str
 
     contains_special_char = validator("name", allow_reuse=True)(

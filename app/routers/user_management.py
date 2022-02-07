@@ -4,7 +4,6 @@ from app import schemas
 from sqlalchemy.orm.session import Session
 from typing import List
 from app.operation import user_management
-
 router = APIRouter(tags=['User Management'])
 
 get_db = db.get_db
@@ -15,7 +14,7 @@ async def create_users(user: schemas.Reqsignup, db: Session = Depends(get_db)):
     return user_management.create_users(user, db)
 
 
-@router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
+@router.get('/user_management/getall_users',response_model=List[schemas.Getsignup])
 async def getall_users(db: Session = Depends(get_db)):
     return user_management.getall_users(db)
 
@@ -35,7 +34,7 @@ async def remove(user_id: int, db: Session = Depends(get_db)):
     return user_management.remove(user_id, db)
 
 
-@router.post('/user/signin', response_model=schemas.Getsignup)
+@router.post('/user/signin')# response_model=schemas.Getsignup
 async def login(email: str, password: str, db: Session = Depends(get_db)):
     return user_management.login(email, password, db)
 

@@ -8,7 +8,9 @@ from fastapi import HTTPException, status
 from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup, Modules, AccessName
 from sqlalchemy.sql import func
 import uuid
+from fastapi.encoders import jsonable_encoder
 import utils.email
+from app.authentication import generate_token
 get_db = db.get_db
 
 
@@ -18,7 +20,7 @@ def create_users(user, db):
 
     # check the user are exist or not
     existuser = db.query(Usersignup).filter(
-        Usersignup.email == user.email).first()
+        Usersignup.email == user.email).first() 
 
     if not existuser:
         # create user
@@ -102,8 +104,14 @@ def update_user(user_id, data, db):
     user_role(set(data.role_id.split(",")), set(
         user.role_id.split(",")), user_id, db)
 
-    getuser.update(
-        {"name": data.name, "address": data.address, "role_id": data.role_id})
+    item = {"role_id": data.role_id}
+    
+    if data.name:
+        item.update({"name": data.name})
+    if data.address:
+        item.update({"address": data.address})
+    
+    getuser.update(item)
     db.commit()
     return user
 
@@ -132,7 +140,13 @@ def login(email, password, db):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="email and password not found")
-    return user
+    # return user
+    if user:
+        token = generate_token(email)
+        return {
+            'token': token
+        }
+       
 
 
 async def forgot_paswords_email_sent(user_id, email, db):
