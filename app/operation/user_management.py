@@ -20,7 +20,7 @@ def create_users(user, db):
 
     # check the user are exist or not
     existuser = db.query(Usersignup).filter(
-        Usersignup.email == user.email).first() 
+        Usersignup.email == user.email).first()
 
     if not existuser:
         # create user
@@ -105,12 +105,12 @@ def update_user(user_id, data, db):
         user.role_id.split(",")), user_id, db)
 
     item = {"role_id": data.role_id}
-    
+
     if data.name:
         item.update({"name": data.name})
     if data.address:
         item.update({"address": data.address})
-    
+
     getuser.update(item)
     db.commit()
     return user
@@ -133,20 +133,15 @@ def remove(user_id, db):
     return {"detail": f"user id {user_id} is deleted"}
 
 
-def login(email, password, db):
-    hash_password = hashlib.md5(password.encode())
+def login(data, db):
+    hash_password = hashlib.md5(data.password.encode())
     user = db.query(Usersignup).filter(Usersignup.email ==
-                                       email, Usersignup.password == hash_password.hexdigest()).first()
+                                       data.email, Usersignup.password == hash_password.hexdigest()).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="email and password not found")
-    # return user
-    if user:
-        token = generate_token(email)
-        return {
-            'token': token
-        }
-       
+    return generate_token(data.email)
+    
 
 
 async def forgot_paswords_email_sent(user_id, email, db):

@@ -34,9 +34,9 @@ async def remove(user_id: int, db: Session = Depends(get_db)):
     return user_management.remove(user_id, db)
 
 
-@router.post('/user/signin')# response_model=schemas.Getsignup
-async def login(email: str, password: str, db: Session = Depends(get_db)):
-    return user_management.login(email, password, db)
+@router.post('/user/signin',response_model=schemas.Getlogin)
+async def login(data:schemas.Reqlogin,db: Session = Depends(get_db)):
+    return user_management.login(data, db)
 
 
 @router.post('/user/forgot_password/sent_email')

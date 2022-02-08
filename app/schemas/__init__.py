@@ -181,4 +181,20 @@ class Getuser_permission(BaseModel):
     module_name: Optional[str]
 
     class Config():
-        orm_mode = True        
+        orm_mode = True     
+
+class Reqlogin(BaseModel):
+    email: str
+    password: str
+
+    validate_email = validator(
+        'email', allow_reuse=True)(validate_emails)
+        
+    class Config():
+        orm_mode = True
+
+class Getlogin(BaseModel):
+    token: Optional[str]
+
+    class Config():
+        orm_mode = True
