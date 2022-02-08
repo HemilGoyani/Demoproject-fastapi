@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from middleware.security import add_process_time_header,check_token_valid
+from middleware.security import check_token_valid
 from app.routers import products, brands, modules, user_management, role
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 
-app.middleware('http')(add_process_time_header)
+
 app.middleware('http')(check_token_valid)
 @app.get("/")
 def root():
