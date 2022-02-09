@@ -15,13 +15,13 @@ async def create_brand(request:Request,brand: schemas.Reubrands, db: Session = D
 
 
 @router.get('/brands/all', status_code=status.HTTP_200_OK, response_model=List[schemas.Getbrands])
-async def getall_brand(db: Session = Depends(get_db)):
-    return brands.getall_brand(db)
+async def getall_brand(request: Request,db: Session = Depends(get_db)):
+    return brands.getall_brand(request,db)
 
 
 @router.get('/brands/get_id', status_code=status.HTTP_200_OK, response_model=schemas.Getbrands)
-async def getaid_brand(brand_id:int, db: Session = Depends(get_db)):
-    return brands.getaid_brand(brand_id,db)
+async def getaid_brand(request: Request,brand_id:int, db: Session = Depends(get_db)):
+    return brands.getaid_brand(request,brand_id,db)
 
 
 @router.put('/brands/update',status_code=status.HTTP_202_ACCEPTED, response_model=schemas.Getbrands)
