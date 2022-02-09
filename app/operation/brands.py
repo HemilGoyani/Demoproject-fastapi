@@ -4,22 +4,43 @@ from fastapi import HTTPException, status
 from app import schemas
 from sqlalchemy.orm.session import Session
 from typing import List
-from app.models import Brand, Product
+from app.models import Brand, Product, Usersignup,AccessName
+from app.operation import users
 
 
-def create_brand(brand, db):
-    existbrand = db.query(Brand).filter(
-        Brand.name == brand.name, Brand.active == brand.active).first()
+def create_brand(request, brand, db):
+    data = users.get_user(request,db)
+    for i in data:
+        print(i)
+        if i.get('module_name') == 'Brand':
+            if i.get('access_type') == AccessName.READ_WRITE:
+                existbrand = db.query(Brand).filter(
+                    Brand.name == brand.name, Brand.active == brand.active).first()
 
-    if not existbrand:
-        create_brand = Brand(name=brand.name, active=brand.active)
-        db.add(create_brand)
-        db.commit()
-        return create_brand
+                if not existbrand:
+                    create_brand = Brand(name=brand.name, active=brand.active)
+                    db.add(create_brand)
+                    db.commit()
+                    return create_brand
 
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_207_MULTI_STATUS, detail="allready brand is exist")
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_207_MULTI_STATUS, detail="allready brand is exist")
+            else:
+                raise HTTPException(status.HTTP_401_UNAUTHORIZED,detail="not permission to the READ_WRITE")
+    
+    # existbrand = db.query(Brand).filter(
+    #     Brand.name == brand.name, Brand.active == brand.active).first()
+
+    # if not existbrand:
+    #     create_brand = Brand(name=brand.name, active=brand.active)
+    #     db.add(create_brand)
+    #     db.commit()
+    #     return create_brand
+
+    # else:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_207_MULTI_STATUS, detail="allready brand is exist")
 
 
 def getall_brand(db):

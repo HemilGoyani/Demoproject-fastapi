@@ -176,7 +176,7 @@ class Change_permissionm(BaseModel):
         orm_mode = True        
 
 class Getuser_permission(BaseModel):
-    access_type:Optional[AccessName]
+    access_type: Optional[AccessName]
     id: Optional[int]
     module_name: Optional[str]
 
@@ -189,7 +189,7 @@ class Reqlogin(BaseModel):
 
     validate_email = validator(
         'email', allow_reuse=True)(validate_emails)
-        
+
     class Config():
         orm_mode = True
 

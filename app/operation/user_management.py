@@ -256,13 +256,13 @@ def getuser_permission(user_id, db):
 def update_user_role_permission(user_id, role_id, data, db):
     get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
     user = get_user.first()
-    print(user.__dict__, "print data")
+    
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f"user id {user_id} not found")
     roles = user.role_id.split(",")
     if str(role_id) in roles:
-        print(role_id, "role id checked")
+        
         check_permission = db.query(Permission).filter(
             Permission.role_id == role_id, Permission.module_id == data.module_id)
         check = check_permission.first()
