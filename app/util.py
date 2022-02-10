@@ -1,10 +1,11 @@
 from fastapi import HTTPException, status
-from fastapi import status, Depends, HTTPException
+from fastapi import status, HTTPException
 from app.models import Usersignup,Modules,Permission,AccessName
 from app import models
 import jwt
 from app.authentication import SECRET_KEY, SECURITY_ALGORITHM
 from fastapi.responses import JSONResponse
+
 
 # common fuction permission access or not
 def module_permission(request, db, module_name, access_type):
@@ -63,7 +64,6 @@ def get_permission(user_id,db):
         record.append(dic)
     return record
 
-
 def commit_data(table,db):
     db.add(table)
     db.commit()
@@ -71,3 +71,7 @@ def commit_data(table,db):
 def delete_data(table,db):
     table.delete(synchronize_session=False)
     db.commit()  
+
+def get_data(model,id,db):
+    get_product = db.query(model).filter(model.id == id)    
+    return get_product

@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from app.models import Brand, Product,AccessName
-from app. util import module_permission,commit_data,delete_data
+from app. util import module_permission,commit_data,delete_data,get_data
 
 module_name = 'Brand'
 access_type = AccessName.READ_WRITE
@@ -9,7 +9,7 @@ access_type = AccessName.READ_WRITE
 def create_product(request,id, product, db):
     data = module_permission(request,db,module_name,access_type)
     if data:
-        get_productid = db.query(Brand).filter(Brand.id == id).first()
+        get_productid = get_data(Brand,id,db).first()
         if get_productid:
             exist_product = db.query(Product).filter(
                 Product.brand_id == id, Product.name == product.name).first()
@@ -17,7 +17,7 @@ def create_product(request,id, product, db):
             if not exist_product:
                 create_product = Product(
                     brand_id=id, name=product.name, active=product.active)
-                commit_data(create_product)
+                commit_data(create_product,db)
                 return create_product
             else:
                 raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
@@ -42,13 +42,14 @@ def getall_products(request,db):
 def update_product(request,id, brand_id, product, db):
     data = module_permission(request,db,module_name,access_type)
     if data:
-        get_product = db.query(Product).filter(Product.id == id)
+        get_product = get_data(Product,id,db)
         get_firts = get_product.first()
 
         if not get_firts:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Product id {id} is not available")
-        brand = db.query(Brand).filter(Brand.id == brand_id).first()
+                           
+        brand = get_data(Brand,brand_id,db).first()    
         if not brand:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Brand id {id} is not available")
@@ -62,7 +63,7 @@ def update_product(request,id, brand_id, product, db):
 def delete_product(request,product_id, db):
     data = module_permission(request,db,module_name,access_type)
     if data:
-        get_product = db.query(Product).filter(Product.id == product_id)
+        get_product = get_data(Product,product_id,db)
         get_firts = get_product.first()
 
         if not get_firts:

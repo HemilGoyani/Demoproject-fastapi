@@ -4,8 +4,8 @@ from app import schemas
 from sqlalchemy.orm.session import Session
 from typing import List
 from app.operation import user_management
-router = APIRouter(tags=['User Management'])
 
+router = APIRouter(tags=['User Management'])
 get_db = db.get_db
 
 

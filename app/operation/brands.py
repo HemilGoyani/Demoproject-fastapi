@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from app.models import Brand, Product, AccessName
-from app.util import module_permission, commit_data, delete_data
+from app.util import module_permission, commit_data, delete_data, get_data
 
 module_name = 'Brand'
 access_type = AccessName.READ_WRITE
@@ -55,7 +55,7 @@ def update_brand(request, id, brand, db):
     if data:
         get_brand = db.query(Brand).filter(Brand.id == id)
         get_first = get_brand.first()
-
+        
         if not get_first:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"brand_id {id} not found")
@@ -78,7 +78,7 @@ def delete_brand(request, id, db):
     if data:
         brand = db.query(Brand).filter(Brand.id == id)
         get_firts = brand.first()
-        
+        # get_firts = get_data(Brand,id,db)
         if not get_firts:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Brand id {id} is not found")
