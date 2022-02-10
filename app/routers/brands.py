@@ -21,13 +21,13 @@ async def getall_brand(request: Request,db: Session = Depends(get_db)):
 
 @router.get('/brands/get_id', status_code=status.HTTP_200_OK, response_model=schemas.Getbrands)
 async def getaid_brand(request: Request,brand_id:int, db: Session = Depends(get_db)):
-    return brands.getaid_brand(request,brand_id,db)
+    return brands.getid_brand(request,brand_id,db)
 
 
 @router.put('/brands/update',status_code=status.HTTP_202_ACCEPTED, response_model=schemas.Getbrands)
-async def update_brand(brand_id: int, brand: schemas.Reubrands, db: Session = Depends(get_db)):
-    return brands.update_brand(brand_id,brand, db)
+async def update_brand(request:Request,brand_id: int, brand: schemas.Reubrands, db: Session = Depends(get_db)):
+    return brands.update_brand(request,brand_id,brand, db)
 
 @router.delete('/brands/delete', status_code=status.HTTP_200_OK)
-async def delete_brand(brand_id: int, db: Session = Depends(get_db)):
-    return brands.delete_brand(brand_id, db)
+async def delete_brand(request:Request,brand_id: int, db: Session = Depends(get_db)):
+    return brands.delete_brand(request,brand_id, db)

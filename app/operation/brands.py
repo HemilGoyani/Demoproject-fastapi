@@ -9,22 +9,22 @@ from typing import List
 from app.models import Brand, Product, Usersignup, AccessName
 from app.operation import users
 module_name = 'Brand'
+access_type = AccessName.READ_WRITE
 
 #common fuction permission access or not 
-def module_permission(request,db,module_name):
+def module_permission(request,db,module_name,access_type):
     data = users.get_user(request,db)
     if not data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Authorization header missing")
     for i in data:
-        print(i)
         if i.get('module_name') == module_name:
-            if i.get('access_type') == AccessName.READ_WRITE:
+            if i.get('access_type') == access_type:
                 return True
             return False
 
 def create_brand(request, brand, db):
     
-    data = module_permission(request,db,module_name)
+    data = module_permission(request,db,module_name,access_type)
     
     if data:
         existbrand = db.query(Brand).filter(
@@ -45,7 +45,7 @@ def create_brand(request, brand, db):
     
 
 def getall_brand(request,db):
-    data = module_permission(request,db,module_name)
+    data = module_permission(request,db,module_name,access_type) or module_permission(request,db,module_name,access_type= AccessName.READ)
     if data:
         get_brand = db.query(Brand).all()
 
@@ -55,51 +55,53 @@ def getall_brand(request,db):
         return get_brand
             
 
-def getaid_brand(request,brand_id, db):
-    data = users.get_user(request,db)
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Authorization header missing")
-    for i in data:
-        print(i)
-        if i.get('module_name') == 'Brand':
-            if i.get('access_type') == AccessName.READ_WRITE or i.get('access_type') == AccessName.READ:
-                get_brand = db.query(Brand).filter(Brand.id == brand_id).first()
+def getid_brand(request,brand_id, db):
+    data = module_permission(request,db,module_name,access_type) or module_permission(request,db,module_name,access_type= AccessName.READ)
+    if data:
+        get_brand = db.query(Brand).filter(Brand.id == brand_id).first()
 
-                if not get_brand:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail=f"Brand id {brand_id} not present")
-                return get_brand
+        if not get_brand:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Brand id {brand_id} not present")
+        return get_brand
 
 
-def update_brand(id, brand, db):
-    get_brand = db.query(Brand).filter(Brand.id == id)
-    get_first = get_brand.first()
+def update_brand(request, id, brand, db):
+    data = module_permission(request,db,module_name,access_type)
+    if data:
+        get_brand = db.query(Brand).filter(Brand.id == id)
+        get_first = get_brand.first()
 
-    if not get_first:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"brand_id {id} not found")
+        if not get_first:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"brand_id {id} not found")
 
-    exist_name = db.query(Brand).filter(Brand.name == brand.name).first()
-    if not exist_name:
-        get_brand.update({"name": brand.name, "active": brand.active})
-        db.commit()
-        return get_first
+        exist_name = db.query(Brand).filter(Brand.name == brand.name).first()
+        if not exist_name:
+            get_brand.update({"name": brand.name, "active": brand.active})
+            db.commit()
+            return get_first
+        else:
+            raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
+                                detail=f"Brand_name {brand.name} allready exist")
     else:
-        raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
-                            detail=f"Brand_name {brand.name} allready exist")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,detail="not permission to the READ_WRITE")
 
-
-def delete_brand(id, db):
-    brand = db.query(Brand).filter(Brand.id == id)
-    get_firts = brand.first()
-    if not get_firts:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Brand id {id} is not found")
-    exist_brand = db.query(Product).filter(Product.brand_id == id).first()
-    if not exist_brand:
-        brand.delete(synchronize_session=False)
-        db.commit()
-        return {"detail": f"Brand id {id} is deleted"}
+def delete_brand(request,id, db):
+    data = module_permission(request,db,module_name,access_type)
+    if data:
+        brand = db.query(Brand).filter(Brand.id == id)
+        get_firts = brand.first()
+        if not get_firts:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Brand id {id} is not found")
+        exist_brand = db.query(Product).filter(Product.brand_id == id).first()
+        if not exist_brand:
+            brand.delete(synchronize_session=False)
+            db.commit()
+            return {"detail": f"Brand id {id} is deleted"}
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Brand id {id} is not delete, reason product is available")
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Brand id {id} is not delete, reason product is available")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED,detail="not permission to the READ_WRITE")

@@ -1,12 +1,10 @@
 import hashlib
 import datetime
-from modulefinder import Module
 from typing import List
 from app import models
 from app.database import db
 from fastapi import HTTPException, status
 from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup, Modules, AccessName
-from sqlalchemy.sql import func
 import uuid
 from fastapi.encoders import jsonable_encoder
 import utils.email

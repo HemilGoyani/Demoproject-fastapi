@@ -22,6 +22,5 @@ def get_user(request, db):
         except:
              return JSONResponse(content={"detail": "INVALID TOKEN"}, status_code=status.HTTP_401_UNAUTHORIZED)
     else:
-        pass
-        # return JSONResponse(content={"detail": "Authorization header missing"}, status_code=status.HTTP_401_UNAUTHORIZED)
+        return JSONResponse(content={"detail": "Authorization header missing"}, status_code=status.HTTP_401_UNAUTHORIZED)
    
