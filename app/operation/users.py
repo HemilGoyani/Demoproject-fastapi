@@ -1,3 +1,4 @@
+from ast import Pass
 from app.database import db
 from fastapi import APIRouter, Request, status, Depends, HTTPException
 from typing import List
@@ -21,6 +22,9 @@ def get_user(request, db):
             return data
         except:
              return JSONResponse(content={"detail": "INVALID TOKEN"}, status_code=status.HTTP_401_UNAUTHORIZED)
-    else:
-        return JSONResponse(content={"detail": "Authorization header missing"}, status_code=status.HTTP_401_UNAUTHORIZED)
+    elif not token:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Authorization header missing")
+    # else:
+    #     Pass
+    #     #return JSONResponse(content={"detail": "Authorization header missing"}, status_code=status.HTTP_401_UNAUTHORIZED)
    

@@ -198,3 +198,11 @@ class Getlogin(BaseModel):
 
     class Config():
         orm_mode = True
+
+class Reuechangepassword(BaseModel):
+    oldpassword: str
+    newpassword: str
+    confirm_new_password: str     
+
+    class Config():
+        orm_mode = True
