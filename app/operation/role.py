@@ -1,17 +1,13 @@
 
-from logging import raiseExceptions
-from multiprocessing import synchronize
 from fastapi import HTTPException, status
-from sqlalchemy.orm.session import Session
 from app.models import Permission, Role, Modules, AccessName, UserRole
-from sqlalchemy.sql import func
+from app.util import commit_data,delete_data
 
 
 def role_permission_set(role_id, module_id, access_name, db):
     permission = Permission(
         role_id=role_id, module_id=module_id, access_type=access_name)
-    db.add(permission)
-    db.commit()
+    commit_data(permission,db)
 
 
 def create_role(name, active, db):
@@ -21,8 +17,7 @@ def create_role(name, active, db):
     if not exist_role:
         create_role = Role(
             name=name.title(), active=active)
-        db.add(create_role)
-        db.commit()
+        commit_data(create_role,db)
 
         modules = db.query(Modules).all()
         for module in modules:
@@ -60,11 +55,9 @@ def delete_role(role_id, db):
         if not user_role:
             permission_roles = db.query(Permission).filter(
                 Permission.role_id == role_id)
-            permission_roles.delete(synchronize_session=False)
-            db.commit()
+            delete_data(permission_roles,db)
 
-            check_roles.delete(synchronize_session=False)
-            db.commit()
+            delete_data(check_roles,db)
             return {"detail": f"Role id {role_id} is deleted"}
         raise HTTPException(status.HTTP_207_MULTI_STATUS,
                             detail=f"Role is assigned to the user, not deleted")

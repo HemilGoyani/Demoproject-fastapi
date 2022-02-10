@@ -62,7 +62,7 @@ async def change_password(id: int,data:schemas.Reuechangepassword, db: Session =
     return user_management.change_password(id, data, db)
 
 
-@router.get('/user_management/get_user_permission')#,response_model=List[schemas.Getuser_permission]
+@router.get('/user_management/get_user_permission')
 async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
     return user_management.getuser_permission(user_id, db)
 

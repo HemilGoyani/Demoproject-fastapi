@@ -1,18 +1,12 @@
-from ast import Pass
-from multiprocessing import synchronize
-from app.database import db
 from fastapi import HTTPException, status
 from app.models import Permission, Role, Modules, AccessName
-from sqlalchemy.sql import func
-from typing import List
 from app.models import Modules
-
+from app.util import commit_data,delete_data
 
 def permission(role_id, module_id, access_name, db):
     permission = Permission(
         role_id=role_id, module_id=module_id, access_type=access_name)
-    db.add(permission)
-    db.commit()
+    commit_data(permission,db)
 
 
 def create_module(module_name, db):
@@ -21,8 +15,7 @@ def create_module(module_name, db):
 
     if not exist_module:
         create_module = Modules(name=module_name.title())
-        db.add(create_module)
-        db.commit()
+        commit_data(create_module,db)
 
         roles = db.query(Role).all()
         for role in roles:
@@ -55,11 +48,9 @@ def delete_module(module_id, db):
                             detail=f" module id {module_id} is not found")
     permission_check = db.query(Permission).filter(
         Permission.module_id == module_id)
-    permission_check.delete(synchronize_session=False)
-    db.commit()
+    delete_data(permission_check)
 
-    module.delete(synchronize_session=False)
-    db.commit()
+    delete_data(module,db)
     return f"module {module_id} is deleted"
 
 

@@ -1,31 +1,17 @@
 import hashlib
 import datetime
-from app import models
 from app.database import db
 from fastapi import HTTPException, status
-from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup, Modules, AccessName
+from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup, AccessName
 import uuid
-from app.operation import users
 import utils.email
 from app.authentication import generate_token
+from app.util import module_permission, get_permission, commit_data, delete_data
+
 get_db = db.get_db
 
 module_name = 'Usermanagement'
 access_type = AccessName.READ_WRITE
-
-# common fuction permission access or not
-
-
-def module_permission(request, db, module_name, access_type):
-    data = users.get_user(request, db)
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Authorization header missing")
-    for i in data:
-        if i.get('module_name') == module_name:
-            if i.get('access_type') == access_type:
-                return True
-            return False
 
 
 def create_users(request, user, db):
@@ -49,14 +35,12 @@ def create_users(request, user, db):
 
             create_user = Usersignup(name=user.name, address=user.address,
                                      email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
-            db.add(create_user)
-            db.commit()
+            commit_data(create_user)
 
             # user_role table enter the data
             for role in role_id:
                 user_role = UserRole(user_id=create_user.id, role_id=role)
-                db.add(user_role)
-                db.commit()
+                commit_data(user_role, db)
             return create_user
         else:
             raise HTTPException(
@@ -95,8 +79,7 @@ def user_role(new_role_id, old_role_id, user_id, db):
     if role_add:
         for role in role_add:
             add_role = UserRole(user_id=user_id, role_id=role)
-            db.add(add_role)
-            db.commit()
+            commit_data(add_role)
 
     if role_detete:
         for role in role_detete:
@@ -154,11 +137,9 @@ def remove(request, user_id, db):
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"id {user_id} is not found")
         user_roles = db.query(UserRole).filter(UserRole.user_id == user_id)
         # user_role = user_roles.all()
-        user_roles.delete(synchronize_session=False)
-        db.commit()
+        delete_data(user_roles, db)
 
-        user.delete(synchronize_session=False)
-        db.commit()
+        delete_data(user, db)
         return {"detail": f"user id {user_id} is deleted"}
     else:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED,
@@ -188,8 +169,7 @@ async def forgot_paswords_email_sent(user_id, email, db):
     current_time = datetime.datetime.utcnow()
     save_token = Email_token(
         email=email, reset_code=reset_code, status=True,  expired_in=current_time)
-    db.add(save_token)
-    db.commit()
+    commit_data(save_token, db)
 
     # sent email
     subject = "forgot password"
@@ -229,7 +209,6 @@ def change_password(id, data, db):
 
 
 def check_reset_password_token(reset_password_token, db):
-
     now = datetime.datetime.utcnow()
     get_token = db.query(Email_token).filter(Email_token.reset_code == reset_password_token,
                                              Email_token.status == True, Email_token.expired_in >= now - datetime.timedelta(minutes=10)).first()
@@ -247,41 +226,12 @@ def reset_password(email, new_password, db):
     getuser.update({"password": hash_password.hexdigest()})
     db.commit()
     disable_token = db.query(Email_token).filter(Email_token.email == email)
-    disable_token.delete(synchronize_session=False)
-    db.commit()
+    delete_data(disable_token, db)
     return user
 
 
 def getuser_permission(user_id, db):
-    get_user = db.query(Usersignup).filter(Usersignup.id == user_id).first()
-
-    if not get_user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND,
-                            detail=f"user id {user_id} not found")
-    role_id = get_user.role_id.split(",")
-    record = []
-
-    module_list = db.query(Modules).all()
-
-    for module in module_list:
-        get_permission = db.query(Permission).filter(
-            Permission.role_id.in_(role_id), Permission.module_id == module.id).all()
-        dic = {
-            "module_name": module.name,
-            "access_type": models.AccessName.NONE
-        }
-        for data in get_permission:
-            if data.access_type.value == AccessName.READ_WRITE.value:
-                dic.update({
-                    "access_type": data.access_type
-                })
-                break
-            elif data.access_type.value == AccessName.READ.value:
-                dic.update({
-                    "access_type": data.access_type
-                })
-        record.append(dic)
-    return record
+    return get_permission(user_id, db)
 
 
 def update_user_role_permission(request, user_id, role_id, data, db):

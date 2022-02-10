@@ -1,23 +1,10 @@
-from ast import Pass
 from fastapi import HTTPException, status
-from app import schemas
-from typing import List
 from app.models import Brand, Product,AccessName
-from app.operation import users
+from app. util import module_permission,commit_data,delete_data
 
 module_name = 'Brand'
 access_type = AccessName.READ_WRITE
 
-#common fuction permission access or not 
-def module_permission(request,db,module_name,access_type):
-    data = users.get_user(request,db)
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Authorization header missing")
-    for i in data:
-        if i.get('module_name') == module_name:
-            if i.get('access_type') == access_type:
-                return True
-            return False
 
 def create_product(request,id, product, db):
     data = module_permission(request,db,module_name,access_type)
@@ -30,8 +17,7 @@ def create_product(request,id, product, db):
             if not exist_product:
                 create_product = Product(
                     brand_id=id, name=product.name, active=product.active)
-                db.add(create_product)
-                db.commit()
+                commit_data(create_product)
                 return create_product
             else:
                 raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
@@ -82,8 +68,7 @@ def delete_product(request,product_id, db):
         if not get_firts:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Product id {product_id} is not found")
-        get_product.delete(synchronize_session=False)
-        db.commit()
+        delete_data(get_product)
         return {"detail": f"Product id {product_id} is deleted"}
     else:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED,detail="not permission to the READ_WRITE")
