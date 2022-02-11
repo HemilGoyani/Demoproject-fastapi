@@ -71,3 +71,10 @@ def delete_data(table,db):
 def get_data(model,id,db):
     get_product = db.query(model).filter(model.id == id)    
     return get_product
+
+def check_role(role_id,Role,db):
+    for role in role_id:
+            check_role_id = db.query(Role).filter(Role.id == role).first()
+            if not check_role_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")    

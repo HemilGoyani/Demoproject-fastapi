@@ -39,8 +39,8 @@ async def getuserbyid(request: Request, user_id: int, db: Session = Depends(get_
 
 @router.put('/user_management/user_update', response_model=schemas.Getsignup)
 async def update_user(request: Request, user_id: int, data: schemas.Update_user, db: Session = Depends(get_db)):
-    data = module_permission(request, db, module_name)
-    if data == AccessName.READ_WRITE:
+    info = module_permission(request, db, module_name)
+    if info == AccessName.READ_WRITE:
         return user_management.update_user(user_id, data, db)
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
                         detail="not permission to the READ_WRITE")
@@ -90,8 +90,8 @@ async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
 
 @router.put('/user_management/update_user_role_permission')
 async def update_user_role_permission(request: Request, user_id: int, role_id: int, data: schemas.Change_permissionm, db: Session = Depends(get_db)):
-    data = module_permission(request, db, module_name)
-    if data == AccessName.READ_WRITE:
-        return user_management.update_user_role_permission(request, user_id, role_id, data, db)
+    info = module_permission(request, db, module_name)
+    if info == AccessName.READ_WRITE:
+        return user_management.update_user_role_permission(user_id, role_id, data, db)
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
                         detail="not permission to the READ_WRITE")

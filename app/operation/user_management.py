@@ -2,38 +2,29 @@ import hashlib
 import datetime
 from app.database import db
 from fastapi import HTTPException, status
-from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup, AccessName
+from app.models import Permission, Role, Usersignup, UserRole, Email_token, Usersignup
 import uuid
 import utils.email
 from app.authentication import generate_token
-from app.util import module_permission, get_permission, commit_data, delete_data
+from app.util import get_data, get_permission, commit_data, delete_data, check_role
 
 get_db = db.get_db
-
 module_name = 'Usermanagement'
 
 
 def create_users(user, db):
-
-    # password convert to hashpassword
     hash_password = hashlib.md5(user.password.encode())
-
-    # check the user are exist or not
     existuser = db.query(Usersignup).filter(
         Usersignup.email == user.email).first()
 
     if not existuser:
-        # create user
         role_id = user.role_id.split(",")
-        for role in role_id:
-            check_role_id = db.query(Role).filter(Role.id == role).first()
-            if not check_role_id:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
+
+        check_role(role_id, Role, db)
 
         create_user = Usersignup(name=user.name, address=user.address,
                                  email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
-        commit_data(create_user)
+        commit_data(create_user, db)
 
         # user_role table enter the data
         for role in role_id:
@@ -46,7 +37,6 @@ def create_users(user, db):
 
 
 def getall_users(db):
-
     user = db.query(Usersignup).all()
     if not user:
         raise HTTPException(
@@ -55,8 +45,7 @@ def getall_users(db):
 
 
 def getuser_id(id, db):
-
-    user = db.query(Usersignup).filter(Usersignup.id == id).first()
+    user = get_data(Usersignup,id,db).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
@@ -70,7 +59,7 @@ def user_role(new_role_id, old_role_id, user_id, db):
     if role_add:
         for role in role_add:
             add_role = UserRole(user_id=user_id, role_id=role)
-            commit_data(add_role)
+            commit_data(add_role, db)
 
     if role_detete:
         for role in role_detete:
@@ -81,7 +70,6 @@ def user_role(new_role_id, old_role_id, user_id, db):
 
 
 def update_user(user_id, data, db):
-
     # check user exist or not
     getuser = db.query(Usersignup).filter(Usersignup.id == user_id)
     user = getuser.first()
@@ -92,11 +80,7 @@ def update_user(user_id, data, db):
 
     # role_id split and checked
     role_id = data.role_id.split(",")
-    for role in role_id:
-        check_role_id = db.query(Role).filter(Role.id == role).first()
-        if not check_role_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
+    check_role(role_id, Role, db)
 
     user_role(set(data.role_id.split(",")), set(
         user.role_id.split(",")), user_id, db)
@@ -114,7 +98,6 @@ def update_user(user_id, data, db):
 
 
 def remove(user_id, db):
-
     user = db.query(Usersignup).filter(Usersignup.id == user_id)
     users = user.first()
 
@@ -169,7 +152,7 @@ async def forgot_paswords_email_sent(user_id, email, db):
 
 
 def change_password(id, data, db):
-    getuser = db.query(Usersignup).filter(Usersignup.id == id)
+    getuser = get_data(Usersignup, id, db)
     user = getuser.first()
 
     hash_password_old = hashlib.md5(data.oldpassword.encode())
@@ -218,9 +201,7 @@ def getuser_permission(user_id, db):
 
 
 def update_user_role_permission(user_id, role_id, data, db):
-
-    get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
-    user = get_user.first()
+    user = get_data(Usersignup,user_id,db).first()
 
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
@@ -230,7 +211,7 @@ def update_user_role_permission(user_id, role_id, data, db):
 
         check_permission = db.query(Permission).filter(
             Permission.role_id == role_id, Permission.module_id == data.module_id)
-        check = check_permission.first()
+
         check_permission.update({"access_type": data.access_type})
         db.commit()
         return f"permission is changed"
