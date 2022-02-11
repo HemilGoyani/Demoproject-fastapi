@@ -20,7 +20,7 @@ async def create_users(request: Request, user: schemas.Reqsignup, db: Session = 
     if data == AccessName.READ_WRITE:
         return user_management.create_users(user, db)
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                        detail="not permission to the READ_WRITE")
+                        detail="user has not permission")
 
 
 @router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
