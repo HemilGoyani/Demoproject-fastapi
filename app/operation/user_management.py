@@ -12,7 +12,7 @@ get_db = db.get_db
 module_name = 'Usermanagement'
 
 
-def create_users(user, db):
+def create_users(user,db):
     hash_password = hashlib.md5(user.password.encode())
     existuser = db.query(Usersignup).filter(
         Usersignup.email == user.email).first()

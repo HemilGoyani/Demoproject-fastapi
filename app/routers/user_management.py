@@ -4,7 +4,7 @@ from app import schemas
 from sqlalchemy.orm.session import Session
 from typing import List
 from app.operation import user_management
-from app.util import module_permission
+from app.util import module_permission,has_permission
 from app.models import AccessName
 
 get_db = db.get_db
@@ -13,14 +13,16 @@ module_name = 'Usermanagement'
 
 router = APIRouter(tags=['User Management'])
 
-
 @router.post('/user_management/create_user', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
 async def create_users(request: Request, user: schemas.Reqsignup, db: Session = Depends(get_db)):
-    data = module_permission(request, db, module_name)
-    if data == AccessName.READ_WRITE:
-        return user_management.create_users(user, db)
-    raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                        detail="user has not permission")
+    return user_management.create_users(user,has_permission(request, db, module_name))
+
+
+    # data = module_permission(request, db, module_name)
+    # if data == AccessName.READ_WRITE:
+    #     return user_management.create_users(user, db)
+    # raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+    #                     detail="user has not permission")
 
 
 @router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
@@ -43,7 +45,7 @@ async def update_user(request: Request, user_id: int, data: schemas.Update_user,
     if info == AccessName.READ_WRITE:
         return user_management.update_user(user_id, data, db)
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                        detail="not permission to the READ_WRITE")
+                        detail="user has no permission")
 
 
 @router.delete('/user_management/user_delete')
@@ -52,7 +54,7 @@ async def remove(request: Request, user_id: int, db: Session = Depends(get_db)):
     if data == AccessName.READ_WRITE:
         return user_management.remove(user_id, db)
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                        detail="not permission to the READ_WRITE")
+                        detail="user has no permission")
 
 
 @router.post('/user/signin', response_model=schemas.Getlogin)
@@ -94,4 +96,4 @@ async def update_user_role_permission(request: Request, user_id: int, role_id: i
     if info == AccessName.READ_WRITE:
         return user_management.update_user_role_permission(user_id, role_id, data, db)
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                        detail="not permission to the READ_WRITE")
+                        detail="user has no permission")

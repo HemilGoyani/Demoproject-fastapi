@@ -1,3 +1,4 @@
+from sqlite3 import dbapi2
 from fastapi import HTTPException, status
 from fastapi import status, HTTPException
 from app.models import Usersignup,Modules,Permission,AccessName
@@ -78,3 +79,11 @@ def check_role(role_id,Role,db):
             if not check_role_id:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")    
+
+def has_permission(request, db, module_name):
+    data = module_permission(request, db, module_name)
+    
+    if data == AccessName.READ_WRITE:
+        return db
+    raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+                        detail="user has not permission")
