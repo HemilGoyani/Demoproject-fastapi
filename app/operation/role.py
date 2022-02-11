@@ -1,7 +1,7 @@
 
 from fastapi import HTTPException, status
 from app.models import Permission, Role, Modules, AccessName, UserRole
-from app.util import commit_data,delete_data
+from app.util import commit_data,delete_data,get_data
 
 
 def role_permission_set(role_id, module_id, access_name, db):
@@ -44,7 +44,7 @@ def get_role(db):
 
 
 def delete_role(role_id, db):
-    check_roles = db.query(Role).filter(Role.id == role_id)
+    check_roles = get_data(Role,role_id,db)
     check_role = check_roles.first()
     if not check_role:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
@@ -61,7 +61,6 @@ def delete_role(role_id, db):
             return {"detail": f"Role id {role_id} is deleted"}
         raise HTTPException(status.HTTP_207_MULTI_STATUS,
                             detail=f"Role is assigned to the user, not deleted")
-
 
 def get_role_permission(role_id, db):
     # check role_id exist or not

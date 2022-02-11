@@ -11,65 +11,56 @@ from app.util import module_permission, get_permission, commit_data, delete_data
 get_db = db.get_db
 
 module_name = 'Usermanagement'
-access_type = AccessName.READ_WRITE
 
 
-def create_users(request, user, db):
-    data = module_permission(request, db, module_name, access_type)
-    if data:
-        # password convert to hashpassword
-        hash_password = hashlib.md5(user.password.encode())
+def create_users(user, db):
 
-        # check the user are exist or not
-        existuser = db.query(Usersignup).filter(
-            Usersignup.email == user.email).first()
+    # password convert to hashpassword
+    hash_password = hashlib.md5(user.password.encode())
 
-        if not existuser:
-            # create user
-            role_id = user.role_id.split(",")
-            for role in role_id:
-                check_role_id = db.query(Role).filter(Role.id == role).first()
-                if not check_role_id:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
+    # check the user are exist or not
+    existuser = db.query(Usersignup).filter(
+        Usersignup.email == user.email).first()
 
-            create_user = Usersignup(name=user.name, address=user.address,
-                                     email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
-            commit_data(create_user)
+    if not existuser:
+        # create user
+        role_id = user.role_id.split(",")
+        for role in role_id:
+            check_role_id = db.query(Role).filter(Role.id == role).first()
+            if not check_role_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
 
-            # user_role table enter the data
-            for role in role_id:
-                user_role = UserRole(user_id=create_user.id, role_id=role)
-                commit_data(user_role, db)
-            return create_user
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_207_MULTI_STATUS, detail="allready email is exist")
+        create_user = Usersignup(name=user.name, address=user.address,
+                                 email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
+        commit_data(create_user)
+
+        # user_role table enter the data
+        for role in role_id:
+            user_role = UserRole(user_id=create_user.id, role_id=role)
+            commit_data(user_role, db)
+        return create_user
     else:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                            detail="not permission to the READ_WRITE")
+        raise HTTPException(
+            status_code=status.HTTP_207_MULTI_STATUS, detail="allready email is exist")
 
 
-def getall_users(request, db):
-    data = module_permission(request, db, module_name, access_type) or module_permission(
-        request, db, module_name, access_type=AccessName.READ)
-    if data:
-        user = db.query(Usersignup).all()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
-        return user
+def getall_users(db):
+
+    user = db.query(Usersignup).all()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
+    return user
 
 
-def getuser_id(request, id, db):
-    data = module_permission(request, db, module_name, access_type) or module_permission(
-        request, db, module_name, access_type=AccessName.READ)
-    if data:
-        user = db.query(Usersignup).filter(Usersignup.id == id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
-        return user
+def getuser_id(id, db):
+
+    user = db.query(Usersignup).filter(Usersignup.id == id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
+    return user
 
 
 def user_role(new_role_id, old_role_id, user_id, db):
@@ -89,61 +80,53 @@ def user_role(new_role_id, old_role_id, user_id, db):
             db.commit()
 
 
-def update_user(request, user_id, data, db):
-    data = module_permission(request, db, module_name, access_type)
-    if data:
-        # check user exist or not
-        getuser = db.query(Usersignup).filter(Usersignup.id == user_id)
-        user = getuser.first()
+def update_user(user_id, data, db):
 
-        if not user:
+    # check user exist or not
+    getuser = db.query(Usersignup).filter(Usersignup.id == user_id)
+    user = getuser.first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+
+    # role_id split and checked
+    role_id = data.role_id.split(",")
+    for role in role_id:
+        check_role_id = db.query(Role).filter(Role.id == role).first()
+        if not check_role_id:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
 
-        # role_id split and checked
-        role_id = data.role_id.split(",")
-        for role in role_id:
-            check_role_id = db.query(Role).filter(Role.id == role).first()
-            if not check_role_id:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
+    user_role(set(data.role_id.split(",")), set(
+        user.role_id.split(",")), user_id, db)
 
-        user_role(set(data.role_id.split(",")), set(
-            user.role_id.split(",")), user_id, db)
+    item = {"role_id": data.role_id}
 
-        item = {"role_id": data.role_id}
+    if data.name:
+        item.update({"name": data.name})
+    if data.address:
+        item.update({"address": data.address})
 
-        if data.name:
-            item.update({"name": data.name})
-        if data.address:
-            item.update({"address": data.address})
-
-        getuser.update(item)
-        db.commit()
-        return user
-    else:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                            detail="not permission to the READ_WRITE")
+    getuser.update(item)
+    db.commit()
+    return user
 
 
-def remove(request, user_id, db):
-    data = module_permission(request, db, module_name, access_type)
-    if data:
-        user = db.query(Usersignup).filter(Usersignup.id == user_id)
-        users = user.first()
+def remove(user_id, db):
 
-        if not users:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"id {user_id} is not found")
-        user_roles = db.query(UserRole).filter(UserRole.user_id == user_id)
-        # user_role = user_roles.all()
-        delete_data(user_roles, db)
+    user = db.query(Usersignup).filter(Usersignup.id == user_id)
+    users = user.first()
 
-        delete_data(user, db)
-        return {"detail": f"user id {user_id} is deleted"}
-    else:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                            detail="not permission to the READ_WRITE")
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"id {user_id} is not found")
+    user_roles = db.query(UserRole).filter(UserRole.user_id == user_id)
+    # user_role = user_roles.all()
+    delete_data(user_roles, db)
+
+    delete_data(user, db)
+    return {"detail": f"user id {user_id} is deleted"}
 
 
 def login(data, db):
@@ -234,27 +217,23 @@ def getuser_permission(user_id, db):
     return get_permission(user_id, db)
 
 
-def update_user_role_permission(request, user_id, role_id, data, db):
-    data = module_permission(request, db, module_name, access_type)
-    if data:
-        get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
-        user = get_user.first()
+def update_user_role_permission(user_id, role_id, data, db):
 
-        if not user:
-            raise HTTPException(status.HTTP_404_NOT_FOUND,
-                                detail=f"user id {user_id} not found")
-        roles = user.role_id.split(",")
-        if str(role_id) in roles:
+    get_user = db.query(Usersignup).filter(Usersignup.id == user_id)
+    user = get_user.first()
 
-            check_permission = db.query(Permission).filter(
-                Permission.role_id == role_id, Permission.module_id == data.module_id)
-            check = check_permission.first()
-            check_permission.update({"access_type": data.access_type})
-            db.commit()
-            return f"permission is changed"
-
+    if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
-                            detail="role_id is not valid for this user")
-    else:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                            detail="not permission to the READ_WRITE")
+                            detail=f"user id {user_id} not found")
+    roles = user.role_id.split(",")
+    if str(role_id) in roles:
+
+        check_permission = db.query(Permission).filter(
+            Permission.role_id == role_id, Permission.module_id == data.module_id)
+        check = check_permission.first()
+        check_permission.update({"access_type": data.access_type})
+        db.commit()
+        return f"permission is changed"
+
+    raise HTTPException(status.HTTP_404_NOT_FOUND,
+                        detail="role_id is not valid for this user")

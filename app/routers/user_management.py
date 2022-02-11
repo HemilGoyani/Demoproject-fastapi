@@ -4,38 +4,59 @@ from app import schemas
 from sqlalchemy.orm.session import Session
 from typing import List
 from app.operation import user_management
+from app.util import module_permission
+from app.models import AccessName
+
+get_db = db.get_db
+
+module_name = 'Usermanagement'
 
 router = APIRouter(tags=['User Management'])
-get_db = db.get_db
 
 
 @router.post('/user_management/create_user', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
-async def create_users(request:Request,user: schemas.Reqsignup, db: Session = Depends(get_db)):
-    return user_management.create_users(request,user, db)
+async def create_users(request: Request, user: schemas.Reqsignup, db: Session = Depends(get_db)):
+    data = module_permission(request, db, module_name)
+    if data == AccessName.READ_WRITE:
+        return user_management.create_users(user, db)
+    raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+                        detail="not permission to the READ_WRITE")
 
 
-@router.get('/user_management/getall_users',response_model=List[schemas.Getsignup])
-async def getall_users(request:Request,db: Session = Depends(get_db)):
-    return user_management.getall_users(request,db)
+@router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
+async def getall_users(request: Request, db: Session = Depends(get_db)):
+    data = module_permission(request, db, module_name)
+    if data != AccessName.NONE:
+        return user_management.getall_users(db)
 
 
 @router.get('/user_management/getuser_id', response_model=schemas.Getsignup)
-async def getuserbyid(request:Request,user_id: int, db: Session = Depends(get_db)):
-    return user_management.getuser_id(request,user_id, db)
+async def getuserbyid(request: Request, user_id: int, db: Session = Depends(get_db)):
+    data = module_permission(request, db, module_name)
+    if data != AccessName.NONE:
+        return user_management.getuser_id(user_id, db)
 
 
 @router.put('/user_management/user_update', response_model=schemas.Getsignup)
-async def update_user(request:Request,user_id: int, data: schemas.Update_user, db: Session = Depends(get_db)):
-    return user_management.update_user(request,user_id, data, db)
+async def update_user(request: Request, user_id: int, data: schemas.Update_user, db: Session = Depends(get_db)):
+    data = module_permission(request, db, module_name)
+    if data == AccessName.READ_WRITE:
+        return user_management.update_user(user_id, data, db)
+    raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+                        detail="not permission to the READ_WRITE")
 
 
 @router.delete('/user_management/user_delete')
-async def remove(request:Request,user_id: int, db: Session = Depends(get_db)):
-    return user_management.remove(request,user_id, db)
+async def remove(request: Request, user_id: int, db: Session = Depends(get_db)):
+    data = module_permission(request, db, module_name)
+    if data == AccessName.READ_WRITE:
+        return user_management.remove(user_id, db)
+    raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+                        detail="not permission to the READ_WRITE")
 
 
-@router.post('/user/signin',response_model=schemas.Getlogin)
-async def login(data:schemas.Reqlogin,db: Session = Depends(get_db)):
+@router.post('/user/signin', response_model=schemas.Getlogin)
+async def login(data: schemas.Reqlogin, db: Session = Depends(get_db)):
     return user_management.login(data, db)
 
 
@@ -58,7 +79,7 @@ async def reset_password(request: schemas.Reset_password, db: Session = Depends(
 
 
 @router.put('/user/change_password', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
-async def change_password(id: int,data:schemas.Reuechangepassword, db: Session = Depends(get_db)):
+async def change_password(id: int, data: schemas.Reuechangepassword, db: Session = Depends(get_db)):
     return user_management.change_password(id, data, db)
 
 
@@ -66,6 +87,11 @@ async def change_password(id: int,data:schemas.Reuechangepassword, db: Session =
 async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
     return user_management.getuser_permission(user_id, db)
 
+
 @router.put('/user_management/update_user_role_permission')
-async def update_user_role_permission(request:Request,user_id: int, role_id: int, data:schemas.Change_permissionm, db: Session = Depends(get_db)):
-    return user_management.update_user_role_permission(request,user_id,role_id,data,db)
+async def update_user_role_permission(request: Request, user_id: int, role_id: int, data: schemas.Change_permissionm, db: Session = Depends(get_db)):
+    data = module_permission(request, db, module_name)
+    if data == AccessName.READ_WRITE:
+        return user_management.update_user_role_permission(request, user_id, role_id, data, db)
+    raise HTTPException(status.HTTP_401_UNAUTHORIZED,
+                        detail="not permission to the READ_WRITE")

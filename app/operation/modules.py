@@ -1,7 +1,8 @@
+from sys import modules
 from fastapi import HTTPException, status
 from app.models import Permission, Role, Modules, AccessName
 from app.models import Modules
-from app.util import commit_data,delete_data
+from app.util import commit_data,delete_data,get_data
 
 def permission(role_id, module_id, access_name, db):
     permission = Permission(
@@ -41,7 +42,7 @@ def get_module(db):
 
 
 def delete_module(module_id, db):
-    module = db.query(Modules).filter(Modules.id == module_id)
+    module = get_data(Modules,module_id,db)
     first_module = module.first()
     if not first_module:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
@@ -56,7 +57,7 @@ def delete_module(module_id, db):
 
 def get_module_permission(module_id, db):
     # check module_id exist or not
-    check_module = db.query(Modules).filter(Modules.id == module_id).first()
+    check_module = get_data(Modules,module_id,db).first()
     if not check_module:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             detail=f'module_id {module_id} is not found')

@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 
 # common fuction permission access or not
-def module_permission(request, db, module_name, access_type):
+def module_permission(request, db, module_name):
     token = request.headers.get('Authorization')
     if token:
         try:
@@ -18,14 +18,10 @@ def module_permission(request, db, module_name, access_type):
                 Usersignup.email == payload.get('email')).first()
 
             data = get_permission(user.id, db)
-            if not data:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Authorization header missing")
             for i in data:
                 if i.get('module_name') == module_name:
-                    if i.get('access_type') == access_type:
-                        return True
-                    return False
+                    return i.get('access_type')
+                    
         except:
             return JSONResponse(content={"detail": "INVALID TOKEN"}, status_code=status.HTTP_401_UNAUTHORIZED)
     elif not token:

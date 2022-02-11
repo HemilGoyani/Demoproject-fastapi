@@ -1,11 +1,9 @@
-import fastapi
 from app.database import db
-from fastapi import APIRouter, FastAPI, status, Depends
+from fastapi import APIRouter,status, Depends
 from app import schemas
 from sqlalchemy.orm.session import Session
 from app.operation import modules
 from typing import List
-from middleware.security import check_token_valid
 
 
 router = APIRouter(tags=["Modules"])
