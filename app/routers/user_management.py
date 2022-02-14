@@ -16,33 +16,31 @@ router = APIRouter(tags=['User Management'])
 
 @router.post('/user_management/create_user', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
 async def create_users(request: Request, user: schemas.Reqsignup, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, AccessName.READ_WRITE))
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
     return user_management.create_users(user, db)
 
 
 @router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
 async def getall_users(request: Request, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, AccessName.READ_WRITE)
-            or has_permission(request, db, module_name, AccessName.READ))
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE,AccessName.READ]))
     return user_management.getall_users(db)
 
 
 @router.get('/user_management/getuser_id', response_model=schemas.Getsignup)
 async def getuserbyid(request: Request, user_id: int, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, AccessName.READ_WRITE)
-            or has_permission(request, db, module_name, AccessName.READ))
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE,AccessName.READ]))
     return user_management.getuser_id(user_id, db)
 
 
 @router.put('/user_management/user_update', response_model=schemas.Getsignup)
 async def update_user(request: Request, user_id: int, data: schemas.Update_user, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, AccessName.READ_WRITE))
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
     return user_management.update_user(user_id, data, db)
 
 
 @router.delete('/user_management/user_delete')
 async def remove(request: Request, user_id: int, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, AccessName.READ_WRITE))
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
     return user_management.remove(user_id, db)
 
 
@@ -81,5 +79,5 @@ async def getuserbyid(user_id: int, db: Session = Depends(get_db)):
 
 @router.put('/user_management/update_user_role_permission')
 async def update_user_role_permission(request: Request, user_id: int, role_id: int, data: schemas.Change_permissionm, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, AccessName.READ_WRITE))
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
     return user_management.update_user_role_permission(user_id, role_id, data, db)

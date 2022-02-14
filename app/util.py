@@ -2,7 +2,7 @@ from os import access
 from sqlite3 import dbapi2
 from fastapi import HTTPException, status
 from fastapi import status, HTTPException
-from app.models import Usersignup,Modules,Permission,AccessName
+from app.models import Usersignup, Modules, Permission, AccessName
 from app import models
 import jwt
 from app.authentication import SECRET_KEY, SECURITY_ALGORITHM
@@ -23,7 +23,7 @@ def module_permission(request, db, module_name):
             for i in data:
                 if i.get('module_name') == module_name:
                     return i.get('access_type')
-                    
+
         except:
             return JSONResponse(content={"detail": "INVALID TOKEN"}, status_code=status.HTTP_401_UNAUTHORIZED)
     elif not token:
@@ -31,7 +31,7 @@ def module_permission(request, db, module_name):
                             detail="Authorization header missing")
 
 
-def get_permission(user_id,db):
+def get_permission(user_id, db):
     get_user = db.query(Usersignup).filter(Usersignup.id == user_id).first()
 
     if not get_user:
@@ -62,31 +62,35 @@ def get_permission(user_id,db):
         record.append(dic)
     return record
 
-def commit_data(table,db):
+
+def commit_data(table, db):
     db.add(table)
     db.commit()
 
-def delete_data(table,db):
-    table.delete(synchronize_session=False)
-    db.commit()  
 
-def get_data(model,id,db):
-    get_product = db.query(model).filter(model.id == id)    
+def delete_data(table, db):
+    table.delete(synchronize_session=False)
+    db.commit()
+
+
+def get_data(model, id, db):
+    get_product = db.query(model).filter(model.id == id)
     return get_product
 
-def check_role(role_id,Role,db):
+
+def check_role(role_id, Role, db):
     for role in role_id:
-            check_role_id = db.query(Role).filter(Role.id == role).first()
-            if not check_role_id:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")    
+        check_role_id = db.query(Role).filter(Role.id == role).first()
+        if not check_role_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"role id {role} is not exist")
 
-def has_permission(request, db, module_name,access_type):
-   
+
+def has_permission(request, db, module_name, access_type):
+
     data = module_permission(request, db, module_name)
-    
-    if data == access_type: 
-        return True
-
+    for access_name in access_type:
+        if data == access_name:
+            return True
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
                         detail="user has not permission")
