@@ -3,39 +3,41 @@ from typing import Optional
 from pydantic import BaseModel, validator
 from fastapi import HTTPException, status
 import re
-from pyrsistent import optional
 from app.models import AccessName
-
-from typer import Option
-
 
 
 def should_not_contains_special_char(string):
     special_char = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
     if special_char.search(string):
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Name should not contain special characters and number')
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                            detail='Name should not contain special characters and number')
     return string
+
 
 def validate_emails(cls, email):
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if email:
         for email in email.split(','):
             if not re.fullmatch(regex, email.strip()):
-                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="email is not valid")
+                raise HTTPException(
+                    status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="email is not valid")
         return email
     return email
+
 
 def should_not_empty(cls, string):
     return_str = string.strip()
     if not return_str:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="empty name or role_id, address not accept")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                            detail="empty name or role_id, address not accept")
     return return_str
+
 
 class Reqsignup(BaseModel):
     name: str
     address: str
     email: str
-    password:str
+    password: str
     confirm_password: str
     role_id: str
     contains_special_char = validator("name", allow_reuse=True)(
@@ -44,37 +46,31 @@ class Reqsignup(BaseModel):
     validate_email = validator(
         'email', allow_reuse=True)(validate_emails)
 
-    
-    _role_id =validator("role_id",allow_reuse=True)(should_not_empty)
-    _address = validator("address",allow_reuse=True)(should_not_empty)
+    _role_id = validator("role_id", allow_reuse=True)(should_not_empty)
+    _address = validator("address", allow_reuse=True)(should_not_empty)
+
     @validator('confirm_password')
     def passwords_match(cls, confirm_password, values, **kwargs):
         if 'password' in values and confirm_password != values['password']:
-            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="confirm password not match to the password field")
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                                detail="confirm password not match to the password field")
         return confirm_password
 
-    
     class Config():
         orm_mode = True
 
-class Getadmin(BaseModel):
-    id: int
-    name: Optional[str]
-    address: Optional[str]
-    email: Optional[str]
-
-    class Config():
-        orm_mode = True
 
 class Getsignup(BaseModel):
     id: int
     name: Optional[str]
     address: Optional[str]
     email: Optional[str]
-    password:Optional[str]
+    password: Optional[str]
     role_id: Optional[str]
+
     class Config():
         orm_mode = True
+
 
 class Update_user(BaseModel):
     name: Optional[str] = None
@@ -83,8 +79,10 @@ class Update_user(BaseModel):
 
     contains_special_char = validator("name", allow_reuse=True)(
         should_not_contains_special_char)
+
     class Config():
         orm_mode = True
+
 
 class login(BaseModel):
     email: str
@@ -96,8 +94,10 @@ class Reubrands(BaseModel):
     active: bool
     _name = validator(
         'name', allow_reuse=True)(should_not_empty)
+
     class Config():
         orm_mode = True
+
 
 class Getbrands(BaseModel):
     id: Optional[int]
@@ -107,15 +107,17 @@ class Getbrands(BaseModel):
     class Config():
         orm_mode = True
 
+
 class Reuproducts(BaseModel):
     name: str
     active: bool
-    
+
     class Config():
         orm_mode = True
 
+
 class Getproducts(BaseModel):
-    id:Optional[int]
+    id: Optional[int]
     brand_id: Optional[int]
     name: Optional[str]
     active: Optional[bool]
@@ -123,25 +125,28 @@ class Getproducts(BaseModel):
     class Config():
         orm_mode = True
 
+
 class Getmodule(BaseModel):
     id: Optional[int]
     name: Optional[str]
-  
+
     class Config():
         orm_mode = True
-    
+
+
 class Getroles(BaseModel):
     id: Optional[int]
     name: Optional[str]
     active: Optional[bool]
-    
+
     class Config():
         orm_mode = True
 
+
 class Getuser_role(BaseModel):
-    id:Optional[int]
+    id: Optional[int]
     user_id: Optional[int]
-    role_id: Optional[int]  
+    role_id: Optional[int]
 
     class Config():
         orm_mode = True
@@ -150,13 +155,14 @@ class Getuser_role(BaseModel):
 class Reset_password(BaseModel):
     reset_password_token: str
     new_password: str
-    confirm_new_password: str        
+    confirm_new_password: str
 
     class Config():
         orm_mode = True
 
+
 class Getrole_permission(BaseModel):
-    access_type:Optional[AccessName]
+    access_type: Optional[AccessName]
     id: Optional[int]
     module_name: Optional[str]
     role_id: Optional[int]
@@ -167,10 +173,11 @@ class Getrole_permission(BaseModel):
 
 class Change_permissionm(BaseModel):
     module_id: int
-    access_type: AccessName       
+    access_type: AccessName
 
     class Config():
-        orm_mode = True        
+        orm_mode = True
+
 
 class Getuser_permission(BaseModel):
     access_type: Optional[AccessName]
@@ -178,7 +185,8 @@ class Getuser_permission(BaseModel):
     module_name: Optional[str]
 
     class Config():
-        orm_mode = True     
+        orm_mode = True
+
 
 class Reqlogin(BaseModel):
     email: str
@@ -190,16 +198,18 @@ class Reqlogin(BaseModel):
     class Config():
         orm_mode = True
 
+
 class Getlogin(BaseModel):
     token: Optional[str]
 
     class Config():
         orm_mode = True
 
-class Reuechangepassword(BaseModel):
+
+class Changepassword(BaseModel):
     oldpassword: str
     newpassword: str
-    confirm_new_password: str     
+    confirm_new_password: str
 
     class Config():
         orm_mode = True

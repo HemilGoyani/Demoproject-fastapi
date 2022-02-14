@@ -1,11 +1,10 @@
-from sqlalchemy import not_
 from app.database import db
-from fastapi import APIRouter, status, Depends, HTTPException, Request, Query
+from fastapi import APIRouter, status, Depends, HTTPException, Request
 from app import schemas
 from sqlalchemy.orm.session import Session
-from typing import List, Optional
+from typing import List
 from app.operation import user_management
-from app.util import module_permission, has_permission
+from app.util import has_permission
 from app.models import AccessName
 
 get_db = db.get_db
@@ -22,13 +21,15 @@ async def create_users(request: Request, user: schemas.Reqsignup, db: Session = 
 
 @router.get('/user_management/getall_users', response_model=List[schemas.Getsignup])
 async def getall_users(request: Request, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE,AccessName.READ]))
+    Depends(has_permission(request, db, module_name, [
+            AccessName.READ_WRITE, AccessName.READ]))
     return user_management.getall_users(db)
 
 
 @router.get('/user_management/getuser_id', response_model=schemas.Getsignup)
 async def getuserbyid(request: Request, user_id: int, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE,AccessName.READ]))
+    Depends(has_permission(request, db, module_name, [
+            AccessName.READ_WRITE, AccessName.READ]))
     return user_management.getuser_id(user_id, db)
 
 
@@ -68,7 +69,7 @@ async def reset_password(request: schemas.Reset_password, db: Session = Depends(
 
 
 @router.put('/user/change_password', status_code=status.HTTP_201_CREATED, response_model=schemas.Getsignup)
-async def change_password(id: int, data: schemas.Reuechangepassword, db: Session = Depends(get_db)):
+async def change_password(id: int, data: schemas.Changepassword, db: Session = Depends(get_db)):
     return user_management.change_password(id, data, db)
 
 
