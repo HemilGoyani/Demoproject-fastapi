@@ -30,14 +30,14 @@ def create_module(module_name, db):
 
     else:
         raise HTTPException(
-            status_code=status.HTTP_207_MULTI_STATUS, detail=f"allready module {module_name} is exist")
+            status_code=status.HTTP_207_MULTI_STATUS, detail=f"Module {module_name} is exist")
 
 
 def get_module(db):
     exist_module = db.query(Modules).all()
     if not exist_module:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"module not exist")
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Module not found")
     return exist_module
 
 
@@ -46,13 +46,13 @@ def delete_module(module_id, db):
     first_module = module.first()
     if not first_module:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
-                            detail=f" module id {module_id} is not found")
+                            detail=f" Module id {module_id} not found")
     permission_check = db.query(Permission).filter(
         Permission.module_id == module_id)
     delete_data(permission_check)
 
     delete_data(module,db)
-    return f"module {module_id} is deleted"
+    return f"Module {module_id} deleted"
 
 
 def get_module_permission(module_id, db):
@@ -60,7 +60,7 @@ def get_module_permission(module_id, db):
     check_module = get_data(Modules,module_id,db).first()
     if not check_module:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
-                            detail=f'module_id {module_id} is not found')
+                            detail=f'Module_id {module_id} not found')
 
     # get module permission
     get_module_permission = db.query(Permission).filter(

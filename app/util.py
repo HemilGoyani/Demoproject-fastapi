@@ -91,7 +91,6 @@ def check_role(role_id, Role, db):
 
 
 def has_permission(request, db, module_name, access_type):
-
     data = module_permission(request, db, module_name)
     for access_name in access_type:
         if data == access_name:

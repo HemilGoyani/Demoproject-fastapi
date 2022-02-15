@@ -18,9 +18,9 @@ def create_product(id, product, db):
         else:
             raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
                                 detail=f"Product is available for the brand_id {id}")
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"brand_id {id} not available")
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Brand_id {id} not available")
 
 
 def getall_products(db):

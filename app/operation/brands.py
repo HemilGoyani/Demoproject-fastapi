@@ -5,7 +5,7 @@ from app.util import module_permission, commit_data, delete_data, get_data
 
 def create_brand(brand, db):
     existbrand = db.query(Brand).filter(
-        Brand.name == brand.name, Brand.active == brand.active).first()
+        Brand.name == brand.name).first()
 
     if not existbrand:
         create_brand = Brand(name=brand.name, active=brand.active)
@@ -14,7 +14,7 @@ def create_brand(brand, db):
 
     else:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="allready brand is exist")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Brand {brand.name} is allready exist")
 
 
 def getall_brand(db):
@@ -23,7 +23,7 @@ def getall_brand(db):
 
     if not get_brand:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Brand is not present")
+            status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
     return get_brand
 
 
@@ -63,11 +63,11 @@ def delete_brand(id, db):
 
     if not get_firts:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Brand id {id} is not found")
+                            detail=f"Brand id {id} not found")
     exist_brand = db.query(Product).filter(Product.brand_id == id).first()
     if not exist_brand:
         delete_data(brand, db)
         return {"detail": f"Brand id {id} is deleted"}
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Brand id {id} is not delete, reason product is available")
+                            detail=f"Brand id {id} not delete, brand allocated with product")
