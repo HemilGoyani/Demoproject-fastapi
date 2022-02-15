@@ -39,7 +39,6 @@ def get_role(db):
     if not exist_role:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail='role are not exist')
-
     return exist_role
 
 
@@ -60,7 +59,7 @@ def delete_role(role_id, db):
             delete_data(check_roles,db)
             return {"detail": f"Role id {role_id} is deleted"}
         raise HTTPException(status.HTTP_207_MULTI_STATUS,
-                            detail=f"Role is assigned to the user, not deleted")
+                            detail=f"Role assigned to the user")
 
 def get_role_permission(role_id, db):
     # check role_id exist or not

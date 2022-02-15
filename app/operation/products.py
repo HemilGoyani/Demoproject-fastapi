@@ -3,8 +3,7 @@ from app.models import Brand, Product, AccessName
 from app. util import commit_data, delete_data, get_data
 
 
-def create_product(id, product, db):
-
+def create_product(id, product,image, db):
     get_productid = get_data(Brand, id, db).first()
     if get_productid:
         exist_product = db.query(Product).filter(
@@ -34,7 +33,6 @@ def getall_products(db):
 
 
 def update_product(id, brand_id, product, db):
-
     get_product = get_data(Product, id, db)
     get_firts = get_product.first()
 
@@ -53,7 +51,6 @@ def update_product(id, brand_id, product, db):
 
 
 def delete_product(product_id, db):
-
     get_product = get_data(Product, product_id, db)
     get_firts = get_product.first()
 

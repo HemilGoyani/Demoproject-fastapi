@@ -1,10 +1,8 @@
 import enum
-from typing import Sequence
-from xmlrpc.client import DateTime, boolean
-from pydantic import BaseModel
+from xmlrpc.client import DateTime
 from app.database.db import Base
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey,
-                        Integer, String)
+                        Integer, String, Text)
 from sqlalchemy.orm import relationship
 from app.database.db import Base
 from sqlalchemy.types import Enum
@@ -41,6 +39,7 @@ class Product(Base):
     brand_id = Column(Integer, ForeignKey('brands.id'), nullable=False)
     name = Column(String, index=True)
     active = Column(Boolean, default=True)
+    product_image = Column(Text,  nullable=True)
 
     brand = relationship("Brand", back_populates="products")
 

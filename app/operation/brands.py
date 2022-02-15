@@ -38,7 +38,6 @@ def getid_brand(brand_id, db):
 
 
 def update_brand(id, brand, db):
-
     get_brand = get_data(Brand, id, db)
     get_first = get_brand.first()
 
@@ -57,7 +56,6 @@ def update_brand(id, brand, db):
 
 
 def delete_brand(id, db):
-
     brand = get_data(Brand, id, db)
     get_firts = brand.first()
 

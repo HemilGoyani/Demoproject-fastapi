@@ -12,43 +12,42 @@ get_db = db.get_db
 module_name = 'Usermanagement'
 
 
-def create_users(user,db):
+def create_users(user, db):
     hash_password = hashlib.md5(user.password.encode())
     existuser = db.query(Usersignup).filter(
         Usersignup.email == user.email).first()
 
-    if not existuser:
-        role_id = user.role_id.split(",")
-
-        check_role(role_id, Role, db)
-
-        create_user = Usersignup(name=user.name, address=user.address,
-                                 email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
-        commit_data(create_user, db)
-
-        # user_role table enter the data
-        for role in role_id:
-            user_role = UserRole(user_id=create_user.id, role_id=role)
-            commit_data(user_role, db)
-        return create_user
-    else:
+    if existuser:
         raise HTTPException(
-            status_code=status.HTTP_207_MULTI_STATUS, detail="allready email is exist")
+            status_code=status.HTTP_207_MULTI_STATUS, detail="Email allready exist")
+
+    role_id = user.role_id.split(",")
+
+    check_role(role_id, Role, db)
+    create_user = Usersignup(name=user.name, address=user.address,
+                             email=user.email, password=hash_password.hexdigest(), role_id=user.role_id)
+    commit_data(create_user, db)
+
+    # user_role table enter the data
+    for role in role_id:
+        user_role = UserRole(user_id=create_user.id, role_id=role)
+        commit_data(user_role, db)
+    return create_user
 
 
 def getall_users(db):
     user = db.query(Usersignup).all()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
+            status_code=status.HTTP_404_NOT_FOUND, detail="User is not exist")
     return user
 
 
 def getuser_id(id, db):
-    user = get_data(Usersignup,id,db).first()
+    user = get_data(Usersignup, id, db).first()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="user is not present")
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not exist")
     return user
 
 
@@ -85,15 +84,20 @@ def update_user(user_id, data, db):
     user_role(set(data.role_id.split(",")), set(
         user.role_id.split(",")), user_id, db)
 
-    item = {"role_id": data.role_id}
-
+    # item = {"role_id": data.role_id}
+    if data.role_id:
+        user.role_id = data.role_id
     if data.name:
-        item.update({"name": data.name})
+        user.name = data.name
+        # item.update({"name": data.name})
     if data.address:
-        item.update({"address": data.address})
-
-    getuser.update(item)
+        user.address = data.address
+        # item.update({"address": data.address})
+    
+    # getuser.update()
+    db.add(user)
     db.commit()
+    db.refresh(user)
     return user
 
 
@@ -113,6 +117,7 @@ def remove(user_id, db):
 
 
 def login(data, db):
+   
     hash_password = hashlib.md5(data.password.encode())
     user = db.query(Usersignup).filter(Usersignup.email ==
                                        data.email, Usersignup.password == hash_password.hexdigest()).first()
@@ -201,7 +206,7 @@ def getuser_permission(user_id, db):
 
 
 def update_user_role_permission(user_id, role_id, data, db):
-    user = get_data(Usersignup,user_id,db).first()
+    user = get_data(Usersignup, user_id, db).first()
 
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND,

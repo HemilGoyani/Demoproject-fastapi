@@ -5,17 +5,22 @@ from fastapi import HTTPException, status
 import re
 from app.models import AccessName
 
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
 
 def should_not_contains_special_char(string):
-    special_char = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
+    if (string.isspace() or string.isdigit()) or len(string) == 0:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                            detail='Name should not contain number and blank space  ')
+
+    special_char = re.compile('[@_!#$%^&*()<>?/\|}{~:0123456789]')
     if special_char.search(string):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                             detail='Name should not contain special characters and number')
-    return string
+    return string.strip()
 
 
 def validate_emails(cls, email):
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if email:
         for email in email.split(','):
             if not re.fullmatch(regex, email.strip()):
@@ -29,9 +34,20 @@ def should_not_empty(cls, string):
     return_str = string.strip()
     if not return_str:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                            detail="empty name or role_id, address not accept")
+                            detail="Role_id should not contain string and blank")
+    role_id = string.split(',')
+    for i in role_id:
+        if i.isalpha():
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                                detail="Role_id should not contain string")
     return return_str
 
+
+def should_not_contain_number(string):
+    if (string.isspace() or string.isdigit()) or len(string) == 0:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                            detail='Address should not contain number and blank space  ')
+    return string
 
 class Reqsignup(BaseModel):
     name: str
@@ -47,7 +63,8 @@ class Reqsignup(BaseModel):
         'email', allow_reuse=True)(validate_emails)
 
     _role_id = validator("role_id", allow_reuse=True)(should_not_empty)
-    _address = validator("address", allow_reuse=True)(should_not_empty)
+    _address = validator("address", allow_reuse=True)(
+        should_not_contain_number)
 
     @validator('confirm_password')
     def passwords_match(cls, confirm_password, values, **kwargs):
@@ -73,9 +90,9 @@ class Getsignup(BaseModel):
 
 
 class Update_user(BaseModel):
-    name: Optional[str] = None
-    address: Optional[str] = None
-    role_id: str
+    name: Optional[str]
+    address: Optional[str]
+    role_id: Optional[str]
 
     contains_special_char = validator("name", allow_reuse=True)(
         should_not_contains_special_char)
@@ -93,7 +110,7 @@ class Reubrands(BaseModel):
     name: str
     active: bool
     _name = validator(
-        'name', allow_reuse=True)(should_not_empty)
+        'name', allow_reuse=True)(should_not_contains_special_char)
 
     class Config():
         orm_mode = True
