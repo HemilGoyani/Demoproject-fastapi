@@ -27,7 +27,6 @@ class Brand(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     active = Column(Boolean, default=True)
-
     products = relationship(
         "Product", back_populates="brand")
 

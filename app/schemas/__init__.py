@@ -1,4 +1,5 @@
 from http.client import HTTPException
+from itertools import product
 from typing import Optional
 from pydantic import BaseModel, validator
 from fastapi import HTTPException, status
@@ -138,6 +139,7 @@ class Getproducts(BaseModel):
     brand_id: Optional[int]
     name: Optional[str]
     active: Optional[bool]
+    product_image: Optional[str]
 
     class Config():
         orm_mode = True

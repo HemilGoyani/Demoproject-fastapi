@@ -1,9 +1,10 @@
+import shutil
 from app.database import db
-from fastapi import APIRouter, status, Depends, Request,UploadFile,File
+from fastapi import APIRouter, Form, Path, status, Depends, Request,UploadFile,File
 from app import schemas
 from sqlalchemy.orm.session import Session
 from app.operation import products
-from typing import List
+from typing import List,Optional
 from app.models import AccessName
 from app. util import has_permission
 
@@ -13,10 +14,12 @@ router = APIRouter(prefix='/product',tags=["Product"])
 get_db = db.get_db
 
 
-@router.post('/create', status_code=status.HTTP_201_CREATED, response_model=schemas.Getproducts)
-async def create_product(request: Request, brand_id: int, product: schemas.Reuproducts, image: UploadFile = File(...) , db: Session = Depends(get_db)):
+@router.post('/create/{brand_id}', status_code=status.HTTP_201_CREATED, response_model=schemas.Getproducts)
+async def create_product(request: Request, brand_id: int, name: str = Form(...), active: bool=Form(...),image: Optional[UploadFile] = File(None), db: Session = Depends(get_db)):   
+    with open('media/'+image.filename,"wb")as buffer:
+        shutil.copyfileobj(image.file, buffer)
     Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
-    return products.create_product(brand_id, product,image, db)
+    return products.create_product(brand_id,name, active ,image.filename, db)
 
 
 @router.get('/all', status_code=status.HTTP_200_OK, response_model=List[schemas.Getproducts])

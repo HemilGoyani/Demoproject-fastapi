@@ -3,15 +3,16 @@ from app.models import Brand, Product, AccessName
 from app. util import commit_data, delete_data, get_data
 
 
-def create_product(id, product,image, db):
+def create_product(id, name, active ,image, db):
+    
     get_productid = get_data(Brand, id, db).first()
     if get_productid:
         exist_product = db.query(Product).filter(
-            Product.brand_id == id, Product.name == product.name).first()
+            Product.brand_id == id, Product.name == name).first()
 
         if not exist_product:
             create_product = Product(
-                brand_id=id, name=product.name, active=product.active)
+                brand_id=id, name= name, active= active, product_image = image)
             commit_data(create_product, db)
             return create_product
         else:
