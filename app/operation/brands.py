@@ -47,11 +47,18 @@ def update_brand(id, brand, db):
 
     exist_name = db.query(Brand).filter(Brand.name == brand.name).first()
     if not exist_name:
-        get_brand.update({"name": brand.name, "active": brand.active})
+        
+        if brand.name:
+            get_first.name= brand.name
+            
+        if brand.active is not None:
+            get_first.active= brand.active
+        db.add(get_first)
         db.commit()
+        db.refresh(get_first)
         return get_first
-    else:
-        raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
+        
+    raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
                             detail=f"Brand_name {brand.name} allready exist")
 
 

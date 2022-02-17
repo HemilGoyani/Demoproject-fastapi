@@ -1,8 +1,6 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from typing import List
-from fastapi import BackgroundTasks
 from starlette.config import Config
-import os
 # load .env
 config = Config(".env")
 email_send = ConnectionConfig(
@@ -19,7 +17,6 @@ email_send = ConnectionConfig(
 # print(email_send.MAIL_FROM, email_send.MAIL_PASSWORD)
 
 async def send_email(subject: str, recipient: List, context: str):
-   print("IN")
    message = MessageSchema(
         subject=subject,
         recipients= recipient,

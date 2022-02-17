@@ -23,11 +23,7 @@ def module_permission(request, db, module_name):
             for i in data:
                 if i.get('module_name') == module_name:
                     return i.get('access_type')
-                    # for access_name in access_type:
-                    #     if i.get('access_type') == access_name:
-                    #         return True
-                    # raise HTTPException(status.HTTP_401_UNAUTHORIZED,
-                    #                     detail="user has not permission")
+               
         except:
             return JSONResponse(content={"detail": "INVALID TOKEN"}, status_code=status.HTTP_401_UNAUTHORIZED)
     elif not token:
@@ -70,6 +66,7 @@ def get_permission(user_id, db):
 def commit_data(table, db):
     db.add(table)
     db.commit()
+    db.refresh(table)
 
 
 def delete_data(table, db):

@@ -1,0 +1,17 @@
+<html>
+<body>
+    <h2 align="center">Inquiry details are:</h2>
+    <table style="margin: auto; background-color: #ffffff;max-width: 900px; width: 70%; border-collapse: collapse;"
+    align="center" border=1>
+    
+        <tr align="center">
+            <td><b>Name</b></td>
+            <td>{{body.get('name')}}</td>
+        </tr>
+        <tr align="center">
+            <td><b>Email</b></td>
+            <td><img src="%{{body.get('image')}}%"></td>
+        </tr>        
+    </table>
+</body>
+</html>

@@ -1,8 +1,7 @@
 from http.client import HTTPException
-from itertools import product
-from typing import Optional
-from pydantic import BaseModel, validator
-from fastapi import HTTPException, status
+from typing import Dict, List, Optional, Union
+from pydantic import BaseModel, validator, EmailStr
+from fastapi import HTTPException, status, UploadFile
 import re
 from app.models import AccessName
 
@@ -108,8 +107,8 @@ class login(BaseModel):
 
 
 class Reubrands(BaseModel):
-    name: str
-    active: bool
+    name: Optional[str]
+    active: Optional[bool]
     _name = validator(
         'name', allow_reuse=True)(should_not_contains_special_char)
 
@@ -232,3 +231,5 @@ class Changepassword(BaseModel):
 
     class Config():
         orm_mode = True
+
+ 
