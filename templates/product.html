@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <title>Document</title>
+</head>
+
+<body>
+    <h2 align="center">Inquiry details are:</h2>
+    <table style="margin: auto; background-color: #ffffff;max-width: 900px; width: 70%; border-collapse: collapse;"
+    align="center" border=1>
+    
+        <tr align="center">
+            <td><b>Name</b></td>
+            <td>{{body.get("name")}}</td>
+        </tr>
+        <tr align="center">
+            <td><b>Image</b></td>
+            <td><img src="media/" + {{body.image}} width="120" height="90"></img></td>    
+        </tr>   
+        
+    </table>
+
+</body>
+</html>
