@@ -1,11 +1,8 @@
-import json
 from fastapi import HTTPException, status
 from app.models import Brand, Product
 from app. util import commit_data, delete_data, get_data
 from fastapi_mail import FastMail, MessageSchema
 from utils.email import email_send
-from fastapi.responses import FileResponse
-
 
 async def create_product(id, name, active, image, email, db):
     get_productid = get_data(Brand, id, db).first()
@@ -13,32 +10,30 @@ async def create_product(id, name, active, image, email, db):
         exist_product = db.query(Product).filter(
             Product.brand_id == id, Product.name == name).first()
 
-        if not exist_product:
-            create_product = Product(
-                brand_id=id, name=name, active=active, product_image= image)
-            
-            context = {
-                "name": name,
-                "image": image,
-                "message": "Product created"
-            }
-               
-            json_data = json.dumps(context)
-            message = MessageSchema(
-                subject="Our product created",
-                recipients=[email],
-                body=json_data
-            )
+        if exist_product:
+            raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
+                                detail=f"Product is available for the brand_id {id}")
 
-            # print(email_send.MAIL_FROM, email_send.MAIL_PASSWORD)
-            fm = FastMail(email_send)
-            await fm.send_message(message, template_name="templates/product.html")
-            
-            commit_data(create_product, db)
-            return create_product   
+        create_product = Product(
+            brand_id=id, name=name, active=active, product_image=image)
+        
+        context = {
+            "name": name,
+            "image": image,
+            "message": "Product created"
+        }
+        
+        message = MessageSchema(
+            subject="Our product created",
+            recipients=[email],
+            body=context
+        )
+        
+        fm = FastMail(email_send)
+        await fm.send_message(message, template_name="product.html") 
 
-        raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,
-                            detail=f"Product is available for the brand_id {id}")
+        commit_data(create_product, db)
+        return create_product
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"Brand_id {id} not available")

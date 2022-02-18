@@ -11,10 +11,9 @@ email_send = ConnectionConfig(
     MAIL_SERVER=config("MAIL_SERVER"),
     MAIL_TLS=config("MAIL_TLS"),
     MAIL_SSL=config("MAIL_SSL"),
-    USE_CREDENTIALS=config("USE_CREDENTIALS")
+    USE_CREDENTIALS=config("USE_CREDENTIALS"),
+    TEMPLATE_FOLDER='app/email'
 )
-
-# print(email_send.MAIL_FROM, email_send.MAIL_PASSWORD)
 
 async def send_email(subject: str, recipient: List, context: str):
    message = MessageSchema(

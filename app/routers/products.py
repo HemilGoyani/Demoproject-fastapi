@@ -28,15 +28,7 @@ def imges(name: str):
 async def create_product(request: Request, brand_id: int, email: str, name: str = Form(...), active: bool=Form(...),image: Optional[UploadFile] = File(...), db: Session = Depends(get_db)):   
     with open('media/'+image.filename,"wb")as buffer:
         shutil.copyfileobj(image.file, buffer)
-    # Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))     
-    # message = MessageSchema(
-    #     subject="Our product created",
-    #     recipients=[email],
-    #     body= name,
-    #     attachments=[image]
-    # )
-    # fm = FastMail(email_send)
-    # await fm.send_message(message, template_name="templates/Product_create.html")
+    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))     
     return await products.create_product(brand_id,name, active ,image.filename,email, db)
 
 @router.get('/all', status_code=status.HTTP_200_OK, response_model=List[schemas.Getproducts])
