@@ -9,8 +9,6 @@ from typing import List,Optional
 from app.models import AccessName
 from app. util import has_permission
 from fastapi.responses import FileResponse
-from fastapi_mail import FastMail, MessageSchema
-from utils.email import email_send
 
 module_name = 'Product'
 
@@ -38,9 +36,9 @@ async def getall_product(request: Request, db: Session = Depends(get_db)):
 
 
 @router.put('/update/{product_id}', status_code=status.HTTP_201_CREATED, response_model=schemas.Getproducts)
-async def update_product(request: Request, product_id: int, brand_id: int, product: schemas.Reuproducts, db: Session = Depends(get_db)):
-    Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
-    return products.update_product(product_id, brand_id, product, db)
+async def update_product(request: Request, product_id: int, brand_id: int, name: Optional[str]= Form(None),active: Optional[bool]= Form(True), image: Optional[UploadFile]= Form(None) ,db: Session = Depends(get_db)):
+    #Depends(has_permission(request, db, module_name, [AccessName.READ_WRITE]))
+    return products.update_product(product_id, brand_id, name, active, image, db)
 
 
 @router.delete('/delete/{product_id}', status_code=status.HTTP_200_OK)

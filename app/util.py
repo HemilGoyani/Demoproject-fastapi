@@ -75,8 +75,8 @@ def delete_data(table, db):
 
 
 def get_data(model, id, db):
-    get_product = db.query(model).filter(model.id == id)
-    return get_product
+    get_data = db.query(model).filter(model.id == id)
+    return get_data
 
 
 def check_role(role_id, Role, db):
@@ -94,3 +94,6 @@ def has_permission(request, db, module_name, access_type):
             return True
     raise HTTPException(status.HTTP_401_UNAUTHORIZED,
                         detail="user has not permission")
+
+def check_data(model,name,db):
+   return db.query(model).filter(model.name == name).first()
