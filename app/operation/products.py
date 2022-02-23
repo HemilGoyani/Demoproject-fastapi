@@ -46,23 +46,25 @@ def getall_products(db):
     return get_product
 
 
-def update_product(id, brand_id, product, db):
-    get_product = get_data(Product, id, db)
-    get_firts = get_product.first()
-
-    if not get_firts:
+def update_product(product_id, brand_id, name, active, image, db):
+    get_product = get_data(Product, product_id, db).first()
+    
+    if not get_product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Product id {id} is not available")
+                            detail=f"Product id {product_id} is not available")
 
     brand = get_data(Brand, brand_id, db).first()
     if not brand:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Brand id {id} is not available")
-
-    get_product.update({"brand_id": brand_id,
-                        "name": product.name, "active": product.active})                     
-    db.commit()
-    return get_firts
+                            detail=f"Brand id {brand_id} is not available")
+    if name:
+        get_product.name = name
+    if active is not None:
+        get_product.active = active
+    if image:
+        get_product.product_image = image 
+    commit_data(get_product, db)
+    return get_product
 
 
 def delete_product(product_id, db):
