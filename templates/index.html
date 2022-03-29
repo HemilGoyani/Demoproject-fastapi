@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Car App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body style="background-color:#4DB6AC;">
+<nav class="navbar navbar-light" style="background-color:#FF0033;">
+    <center>
+        <h1>Car Management System</h1>
+    </center>
+</nav>
+<br>
+    <a class="navbar-link btn-lg" href="{% url 'login' %}" style="background-color:#FFCC33;color:#000000;">User Login</a>
+    <a href="{% url 'admin:index' %}" class = 'navbar-link btn-lg' style="background-color:#FFCC33;color:#000000;">Dealer login</a>
+<br>
+<br>
+{% block content %}
+<div class="card-columns">
+    {% for car in shelf %}
+    <div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <img class="card-img-top" src="{{ car.picture.url }}">
+    <h5 class="card-title">Model:{{ car.model }}</h5>
+    <p class="card-text">Make:{{ car.make }}</p>
+    <p class="card-text">Condition:{{ car.Condition }}</p>
+    <p class="card-title">Year:{{car.year}}</p>
+   <div class="card-footer bg-transparent border-dark">
+   
+   
+    </div>
+  </div>
+</div>
+    {% endfor %}
+</div>
+{% endblock %}
+</body>
+</html>
